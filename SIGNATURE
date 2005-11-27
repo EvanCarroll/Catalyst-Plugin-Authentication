@@ -1,0 +1,41 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.50.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It will check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+SHA1 c847c2ac594cc4807ee40927582c62edd3f1f012 Build.PL
+SHA1 5417ac0457f9fdb4b8aa05ac58a3fa2b32b0aa44 MANIFEST
+SHA1 342fc0e1957630e1f0bc54d2579bd6bda19ee559 META.yml
+SHA1 3c74e0d0fa0ec7077ebff31d913ca0a2e5fb5723 Makefile.PL
+SHA1 328c5c3af4ba7196c141a35cba15ce4f58c4a9be README
+SHA1 a9d221439f08010aee5142228f9d6b25b7c3bb8c lib/Catalyst/Plugin/Authentication.pm
+SHA1 916f953d74cef4bf9d2137d7c924e56c47739ff3 lib/Catalyst/Plugin/Authentication/Credential.pod
+SHA1 7f88c5f45bf53a3a3e52fde498a5ca2bd092e04a lib/Catalyst/Plugin/Authentication/Credential/Password.pm
+SHA1 09c5c4c1adbe2f8428490b3ba98dc6f7c61ea3ba lib/Catalyst/Plugin/Authentication/Store.pod
+SHA1 bf6c8439126138b1fc597e861072793de4688665 lib/Catalyst/Plugin/Authentication/Store/Minimal.pm
+SHA1 866fc5da4c562d183494e2198aa6edad6fcce68a lib/Catalyst/Plugin/Authentication/Store/Minimal/Backend.pm
+SHA1 b3d543b4c855ca1ab7cd245fdcd21c9c0ed2f3c8 lib/Catalyst/Plugin/Authentication/User.pm
+SHA1 e4f1a5de712803bc1214a7fa8339f300c1115f85 lib/Catalyst/Plugin/Authentication/User/Hash.pm
+SHA1 3b36d4055c058fd2177504f085bdf23d7e880a7e t/04_authentication.t
+SHA1 c1f005030777721898ecd416cee27e6828bba40f t/05_password.t
+SHA1 73fb491162aa37f82a4cf90a046265868981e19b t/06_user.t.t
+SHA1 237e09833971b567a605e9803852257aa6753c62 t/live_app.t
+SHA1 9836a4c0ec37aa49014b105096abc619be4f55ff t/live_app_session.t
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.1 (Darwin)
+
+iD8DBQFDiiHuVCwRwOvSdBgRAo2UAJ4tWb0Jdt34V1Q0/Is1C2/iTgB+4QCeLdPr
+jSw+ZgD/gfD13A8XZ81rKcI=
+=JGX/
+-----END PGP SIGNATURE-----

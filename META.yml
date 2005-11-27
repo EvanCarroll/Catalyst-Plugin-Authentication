@@ -1,0 +1,27 @@
+---
+name: Catalyst-Plugin-Authentication
+version: 0.01
+author:
+  - 'Yuval Kogman, C<nothingmuch@woobling.org>'
+abstract: |-
+  Infrastructure plugin for the Catalyst
+  authentication framework.
+license: perl
+requires:
+  Catalyst: 5.49
+  perl: 5.8.1
+provides:
+  Catalyst::Plugin::Authentication:
+    file: lib/Catalyst/Plugin/Authentication.pm
+    version: 0.01
+  Catalyst::Plugin::Authentication::Credential::Password:
+    file: lib/Catalyst/Plugin/Authentication/Credential/Password.pm
+  Catalyst::Plugin::Authentication::Store::Minimal:
+    file: lib/Catalyst/Plugin/Authentication/Store/Minimal.pm
+  Catalyst::Plugin::Authentication::Store::Minimal::Backend:
+    file: lib/Catalyst/Plugin/Authentication/Store/Minimal/Backend.pm
+  Catalyst::Plugin::Authentication::User:
+    file: lib/Catalyst/Plugin/Authentication/User.pm
+  Catalyst::Plugin::Authentication::User::Hash:
+    file: lib/Catalyst/Plugin/Authentication/User/Hash.pm
+generated_by: Module::Build version 0.2611

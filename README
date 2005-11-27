@@ -1,0 +1,99 @@
+NAME
+    Catalyst::Plugin::Authentication - Infrastructure plugin for the
+    Catalyst authentication framework.
+
+SYNOPSIS
+            use Catalyst qw/
+                    Authentication
+                    Authentication::Store::Foo
+                    Authentication::Credential::Password
+            /;
+
+DESCRIPTION
+    The authentication plugin is used by the various authentication and
+    authorization plugins in catalyst.
+
+    It defines the notion of a logged in user, and provides integration with
+    the Catalyst::Plugin::Session plugin,
+
+METHODS
+    user
+        Returns the currently logged user or undef if there is none.
+
+    logout
+        Delete the currently logged in user from "user" and the session.
+
+    get_user $uid
+        Delegate "get_user" to the default store.
+
+METHODS FOR STORE MANAGEMENT
+    default_auth_store
+    Return the store whose name is 'default'.
+
+    This is set to "<$c-"config->{authentication}{store}>> if that value
+    exists, or by using a Store plugin:
+
+            use Catalyst qw/Authentication Authentication::Store::Minimal/;
+
+    Sets the default store to
+    Catalyst::Plugin::Authentication::Store::Minimal::Backend.
+
+    get_auth_store $name
+    Return the store whose name is $name.
+
+    get_auth_store_name $store
+    Return the name of the store $store.
+
+    auth_stores
+    A hash keyed by name, with the stores registered in the app.
+
+    auth_store_names
+    A ref-hash keyed by store, which contains the names of the stores.
+
+    register_auth_stores %stores_by_name
+    Register stores into the application.
+
+INTERNAL METHODS
+    set_authenticated $user
+        Marks a user as authenticated. Should be called from a
+        "Catalyst::Plugin::Authentication::Credential" plugin after
+        successful authentication.
+
+        This involves setting "user" and the internal data in "session" if
+        Catalyst::Plugin::Session is loaded.
+
+    auth_restore_user $user
+        Used to restore a user from the session, by "user" only when it's
+        actually needed.
+
+    save_user_in_session $user
+        Used to save the user in a session.
+
+    prepare
+        Revives a user from the session object if there is one.
+
+    setup
+        Sets the default configuration parameters.
+
+    *
+
+CONFIGURATION
+    use_session
+        Whether or not to store the user's logged in state in the session,
+        if the application is also using the
+        Catalyst::Plugin::Authentication plugin.
+
+SEE ALSO
+    Catalyst::Plugin::Authentication::Credential::Password,
+    Catalyst::Plugin::Authentication::Store::Minimal,
+    Catalyst::Plugin::Authorization::ACL,
+    Catalyst::Plugin::Authorization::Roles.
+
+AUTHOR
+    Yuval Kogman, "nothingmuch@woobling.org"
+
+COPYRIGHT & LICNESE
+            Copyright (c) 2005 the aforementioned authors. All rights
+            reserved. This program is free software; you can redistribute
+            it and/or modify it under the same terms as Perl itself.
+
