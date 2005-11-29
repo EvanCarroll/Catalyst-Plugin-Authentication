@@ -1,6 +1,6 @@
 ---
 name: Catalyst-Plugin-Authentication
-version: 0.01
+version: 0.02
 author:
   - 'Yuval Kogman, C<nothingmuch@woobling.org>'
 abstract: |-
@@ -13,7 +13,7 @@ requires:
 provides:
   Catalyst::Plugin::Authentication:
     file: lib/Catalyst/Plugin/Authentication.pm
-    version: 0.01
+    version: 0.02
   Catalyst::Plugin::Authentication::Credential::Password:
     file: lib/Catalyst/Plugin/Authentication/Credential/Password.pm
   Catalyst::Plugin::Authentication::Store::Minimal:

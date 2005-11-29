@@ -15,12 +15,12 @@ use warnings;
 use Tie::RefHash;
 use Class::Inspector;
 
-BEGIN {
-	require constant;
-	constant->import(have_want => eval { require Want });
-}
+#BEGIN {
+#	require constant;
+#	constant->import(have_want => eval { require Want });
+#}
 
-our $VERSION = "0.01";
+our $VERSION = "0.02";
 
 sub set_authenticated {
     my ( $c, $user ) = @_;
@@ -48,7 +48,7 @@ sub user {
     my $user = $c->_user;
 
     if ( $user and !Scalar::Util::blessed($user) ) {
-		return 1 if have_want() && Want::want("BOOL");
+#		return 1 if have_want() && Want::want("BOOL");
         return $c->auth_restore_user($user);
     }
 
@@ -106,7 +106,7 @@ sub auth_restore_user {
     my ( $c, $frozen_user, $store_name ) = @_;
 
     return
-      unless $c->isa("Catalyst::PLugin::Session")
+      unless $c->isa("Catalyst::Plugin::Session")
       and $c->config->{authentication}{use_session}
       and $c->sessionid;
 

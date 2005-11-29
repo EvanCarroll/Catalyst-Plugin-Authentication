@@ -1,0 +1,6 @@
+0.02
+		- Fixed a typo (PLugin instead of Plugin) that caused user objects
+		  to not be restored from the session properly. Modified test suite
+		  to actually test for this case.
+
+

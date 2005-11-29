@@ -15,11 +15,12 @@ not run its Makefile.PL or Build.PL.
 Hash: SHA1
 
 SHA1 c847c2ac594cc4807ee40927582c62edd3f1f012 Build.PL
-SHA1 5417ac0457f9fdb4b8aa05ac58a3fa2b32b0aa44 MANIFEST
-SHA1 342fc0e1957630e1f0bc54d2579bd6bda19ee559 META.yml
+SHA1 f087003eb6bfa59f1da52a0aad642a1ad625778c Changes
+SHA1 cdf0c5802cd0a2c5053c3e5cebf1e7dc19372b77 MANIFEST
+SHA1 a61268de0bfeb9dedb5a69d1f7777668f3b4f47d META.yml
 SHA1 3c74e0d0fa0ec7077ebff31d913ca0a2e5fb5723 Makefile.PL
 SHA1 328c5c3af4ba7196c141a35cba15ce4f58c4a9be README
-SHA1 a9d221439f08010aee5142228f9d6b25b7c3bb8c lib/Catalyst/Plugin/Authentication.pm
+SHA1 f40d2c1b10389c5c38bcd298b1b3be0ed85c016f lib/Catalyst/Plugin/Authentication.pm
 SHA1 916f953d74cef4bf9d2137d7c924e56c47739ff3 lib/Catalyst/Plugin/Authentication/Credential.pod
 SHA1 7f88c5f45bf53a3a3e52fde498a5ca2bd092e04a lib/Catalyst/Plugin/Authentication/Credential/Password.pm
 SHA1 09c5c4c1adbe2f8428490b3ba98dc6f7c61ea3ba lib/Catalyst/Plugin/Authentication/Store.pod
@@ -31,11 +32,11 @@ SHA1 3b36d4055c058fd2177504f085bdf23d7e880a7e t/04_authentication.t
 SHA1 c1f005030777721898ecd416cee27e6828bba40f t/05_password.t
 SHA1 73fb491162aa37f82a4cf90a046265868981e19b t/06_user.t.t
 SHA1 237e09833971b567a605e9803852257aa6753c62 t/live_app.t
-SHA1 9836a4c0ec37aa49014b105096abc619be4f55ff t/live_app_session.t
+SHA1 51bb8acc5b7fda62566b3e8c2ab9b1337872134e t/live_app_session.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.1 (Darwin)
 
-iD8DBQFDiiHuVCwRwOvSdBgRAo2UAJ4tWb0Jdt34V1Q0/Is1C2/iTgB+4QCeLdPr
-jSw+ZgD/gfD13A8XZ81rKcI=
-=JGX/
+iD8DBQFDiv6rVCwRwOvSdBgRAvfwAJ9j5lAT6ODvge+lGsT6lx0FkRiVnwCgquyO
+n9ZJMv3WtwxKTeaDoU4qOfw=
+=p8Ey
 -----END PGP SIGNATURE-----
