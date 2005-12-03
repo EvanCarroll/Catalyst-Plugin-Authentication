@@ -20,7 +20,7 @@ use Class::Inspector;
 #	constant->import(have_want => eval { require Want });
 #}
 
-our $VERSION = "0.02";
+our $VERSION = "0.03";
 
 sub set_authenticated {
     my ( $c, $user ) = @_;
@@ -55,6 +55,11 @@ sub user {
     return $user;
 }
 
+sub user_exists {
+	my $c = shift;
+	return defined($c->_user);
+}
+
 sub save_user_in_session {
     my ( $c, $user ) = @_;
 
@@ -73,6 +78,8 @@ sub logout {
     {
         delete @{ $c->session }{qw/__user __user_store/};
     }
+    
+    $c->NEXT::logout(@_);
 }
 
 sub get_user {
@@ -195,19 +202,35 @@ authentication framework.
 
 =head1 SYNOPSIS
 
-	use Catalyst qw/
-		Authentication
-		Authentication::Store::Foo
-		Authentication::Credential::Password
-	/;
+    use Catalyst qw/
+        Authentication
+        Authentication::Store::Foo
+        Authentication::Credential::Password
+    /;
+
+    # later on ...
+    # ->login is provided by the Credential::Password module
+    $c->login('myusername', 'mypassword');
+    my $age = $c->user->age;
+    $c->logout;
 
 =head1 DESCRIPTION
 
-The authentication plugin is used by the various authentication and
-authorization plugins in catalyst.
+The authentication plugin provides generic user support. It is the basis 
+for both authentication (checking the user is who they claim to be), and 
+authorization (allowing the user to do what the system authorises them to do).
 
-It defines the notion of a logged in user, and provides integration with the
-L<Catalyst::Plugin::Session> plugin, 
+Using authentication is split into two parts. A Store is used to actually 
+store the user information, and can store any amount of data related to 
+the user. Multiple stores can be accessed from within one application. 
+Credentials are used to verify users, using the store, given data from 
+the frontend.
+
+To implement authentication in a catalyst application you need to add this 
+module, plus at least one store and one credential module.
+
+Authentication data can also be stored in a session, if the application 
+is using the L<Catalyst::Plugin::Session> module.
 
 =head1 METHODS
 
@@ -215,7 +238,25 @@ L<Catalyst::Plugin::Session> plugin,
 
 =item user
 
-Returns the currently logged user or undef if there is none.
+Returns the currently logged in user or undef if there is none.
+
+=item user_exists
+
+Whether or not a user is logged in right now.
+
+The reason this method exists is that C<<$c->user>> may needlessly load the
+user from the auth store.
+
+If you're just going to say
+
+	if ( $c->user_user ) {
+		# foo
+	} else {
+		$c->forward("login");
+	}
+
+it should be more efficient than C<<$c->user>> when a user is marked in the session
+but C<< $c->user >> hasn't been called yet.
 
 =item logout
 
@@ -223,17 +264,49 @@ Delete the currently logged in user from C<user> and the session.
 
 =item get_user $uid
 
-Delegate C<get_user> to the default store.
+Fetch a particular users details, defined by the given ID, via the default store.
+
+=back
+
+=head1 CONFIGURATION
+
+=over 4
+
+=item use_session
+
+Whether or not to store the user's logged in state in the session, if the
+application is also using the L<Catalyst::Plugin::Session> plugin. This 
+value is set to true per default.
+
+=item store
+
+If multiple stores are being used, set the module you want as default here.
+
+=item stores
+
+If multiple stores are being used, you need to provide a name for each store
+here, as a hash, the keys are the names you wish to use, and the values are
+the the names of the plugins.
+
+ # example
+ __PACKAGE__->config( authentication => {
+                        store => 'Catalyst::Plugin::Authentication::Store::HtPasswd',
+                        stores => { 
+                           'dbic' => 'Catalyst::Plugin::Authentication::Store::DBIC'
+                                  }
+                                         });
 
 =back
 
 =head1 METHODS FOR STORE MANAGEMENT
 
+=over 4
+
 =item default_auth_store
 
 Return the store whose name is 'default'.
 
-This is set to C<<$c->config->{authentication}{store}>> if that value exists,
+This is set to C<< $c->config->{authentication}{store} >> if that value exists,
 or by using a Store plugin:
 
 	use Catalyst qw/Authentication Authentication::Store::Minimal/;
@@ -261,6 +334,8 @@ A ref-hash keyed by store, which contains the names of the stores.
 =item register_auth_stores %stores_by_name
 
 Register stores into the application.
+
+=back
 
 =head1 INTERNAL METHODS
 
@@ -296,17 +371,6 @@ Sets the default configuration parameters.
 
 =back
 
-=head1 CONFIGURATION
-
-=over 4
-
-=item use_session
-
-Whether or not to store the user's logged in state in the session, if the
-application is also using the L<Catalyst::Plugin::Authentication> plugin.
-
-=back
-
 =head1 SEE ALSO
 
 L<Catalyst::Plugin::Authentication::Credential::Password>,
@@ -314,9 +378,13 @@ L<Catalyst::Plugin::Authentication::Store::Minimal>,
 L<Catalyst::Plugin::Authorization::ACL>,
 L<Catalyst::Plugin::Authorization::Roles>.
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Yuval Kogman, C<nothingmuch@woobling.org>
+
+Jess Robinson
+
+David Kamholz
 
 =head1 COPYRIGHT & LICNESE
 

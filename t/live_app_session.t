@@ -6,9 +6,9 @@ use warnings;
 use Test::More;
 
 BEGIN {
-	eval { require Catalyst::Plugin::Session; require Catalyst::Plugin::Session::State::Cookie };
-	plan skip_all => "This test needs Catalyst::Plugin::Session and Catalyst::Plugin::Session::State::Cookie installed" if $@;
-	plan tests => 12;
+	eval { require Test::WWW::Mechanize::Catalyst; require Catalyst::Plugin::Session; require Catalyst::Plugin::Session::State::Cookie };
+	plan skip_all => "This test needs Test::WWW::Mechanize::Catalyst, Catalyst::Plugin::Session and Catalyst::Plugin::Session::State::Cookie installed" if $@;
+	plan tests => 14;
 }
 
 {
@@ -40,6 +40,7 @@ BEGIN {
 		my ( $self, $c ) = @_;
 
 		ok(!$c->sessionid, "no session id yet");
+		ok(!$c->user_exists, "no user exists");
 		ok(!$c->user, "no user yet");
 		ok($c->login( "foo", "s3cr3t" ), "can login with clear");
 		is( $c->user, $users->{foo}, "user object is in proper place");
@@ -49,6 +50,7 @@ BEGIN {
 		my ( $self, $c ) = @_;
 
 		ok( $c->sessionid, "session ID was restored" );
+		ok( $c->user_exists, "user exists" );
 		ok( $c->user, "a user was also restored");
 		is_deeply( $c->user, $users->{foo}, "restored user is the right one (deep test - store might change identity)" );
 

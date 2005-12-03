@@ -104,13 +104,14 @@ with a password.
     sub login : Local {
         my ( $self, $c ) = @_;
 
-        $c->login( $c->req->param('login'), $c->req->param('password') );
+        $c->login( $c->req->param('username'), $c->req->param('password') );
     }
 
 =head1 DESCRIPTION
 
-This authentication credential checker takes a user and a password, and tries
-various methods of comparing a password based on what the user supports:
+This authentication credential checker takes a username (or userid) and a 
+password, and tries various methods of comparing a password based on what 
+the chosen store's user objects support:
 
 =over 4
 
@@ -134,30 +135,42 @@ with L<Digest>.
 
 =over 4
 
-=item login $user, $password
-
-=item login
+=item login $username, $password
 
 Try to log a user in.
 
-C<$user> can be an ID or object. If it isa
-L<Catalyst::Plugin::Authentication::User> it will be used as is. Otherwise
-C<< $c->get_user >> is used to retrieve it.
+C<$username> can be a string (e.g. retrieved from a form) or an object. 
+If the object is a L<Catalyst::Plugin::Authentication::User> it will be used 
+as is. Otherwise C<< $c->get_user >> is used to retrieve it.
 
 C<$password> is a string.
 
-If C<$user> or C<$password> are not provided the parameters C<login>, C<user>,
-C<username> and C<password>, C<passwd>, C<pass> will be tried instead.
+If C<$username> or C<$password> are not provided the query parameters 
+C<login>, C<user>, C<username> and C<password>, C<passwd>, C<pass> will 
+be tried instead.
 
 =back
 
+=head1 RELATED USAGE
+
+After the user is logged in, the user object for the current logged in user 
+can be retrieved from the context using the C<< $c->user >> method.
+
+The current user can be logged out again by calling the C<< $c->logout >> 
+method.
+
 =head1 SUPPORTING THIS PLUGIN
+
+For a User class to support credential verification using this plugin, it
+needs to indicate what sort of password a given user supports 
+by implementing the C<supported_features> method in one or many of the 
+following ways:
 
 =head2 Clear Text Passwords
 
 Predicate:
 
-	$user->supports(qw/password clear/);
+	$user->supported_features(qw/password clear/);
 
 Expected methods:
 
@@ -173,7 +186,7 @@ Returns the user's clear text password as a string to be compared with C<eq>.
 
 Predicate:
 
-	$user->supports(qw/password crypted/);
+	$user->supported_features(qw/password crypted/);
 
 Expected methods:
 
@@ -189,7 +202,7 @@ Return's the user's crypted password as a string, with the salt as the first two
 
 Predicate:
 
-	$user->supports(qw/password hashed/);
+	$user->supported_features(qw/password hashed/);
 
 Expected methods:
 
@@ -210,11 +223,13 @@ Returns a string suitable for feeding into L<Digest/new>.
 Returns a string to be hashed before/after the user's password. Typically only
 a pre-salt is used.
 
+=back
+
 =head2 Crypt::SaltedHash Passwords
 
 Predicate:
 
-	$user->supports(qw/password salted_hash/);
+	$user->supported_features(qw/password salted_hash/);
 
 Expected methods:
 
@@ -222,7 +237,7 @@ Expected methods:
 
 =item hashed_password
 
-Return's the hash of the user's password as returned from L<Crypt-SaltedHash>->generate.
+Returns the hash of the user's password as returned from L<Crypt-SaltedHash>->generate.
 
 =back
 

@@ -23,6 +23,12 @@ the Store plugins typically only act at setup time. They rarely do more than
 check out the configuration, and register e.g. Store::Foo::Backend, and set it
 as the default store.
 
+    __PACKAGE__->default_auth_store( $store );
+
+    # the same as
+
+    __PACKAGE__->register_auth_stores( default => $store );
+
 =head1 WORKING WITH USERS
 
 All credential verifiers should accept either a user object, or a user ID.

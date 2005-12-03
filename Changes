@@ -1,6 +1,12 @@
-0.02
+Revision history for Perl extension Catalyst::Plugin::Authentication
+
+0.03    2005-12-03 18:00:00
+        - Added user_exists method.
+
+0.02    2005-11-29 11:39:00
 		- Fixed a typo (PLugin instead of Plugin) that caused user objects
 		  to not be restored from the session properly. Modified test suite
 		  to actually test for this case.
 
-
+0.01    2005-11-27 02:30:00
+        - Initial release.

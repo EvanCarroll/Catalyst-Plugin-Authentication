@@ -28,7 +28,7 @@ __END__
 =head1 NAME
 
 Catalyst::Plugin::Authentication::Store::Minimal - Authentication
-database in C<<$c->config>>.
+database in C<< $c->config >>.
 
 =head1 SYNOPSIS
 
@@ -57,13 +57,31 @@ database in C<<$c->config>>.
 This authentication store plugin lets you create a very quick and dirty user
 database in your application's config hash.
 
+You will need to include the Authentication plugin, and at least one Credential
+plugin to use this Store. Credential::Password is reccommended.
+
 It's purpose is mainly for testing, and it should probably be replaced by a
 more "serious" store for production.
 
 The hash in the config, as well as the user objects/hashes are freely mutable
 at runtime.
 
-=head1 METHODS
+=head1 CONFIGURATION
+
+=over 4
+
+=item users
+
+This is a simple hash of users, the keys are the usenames, and the values are
+hashrefs containing a password key/value pair, and optionally, a roles/list 
+of role-names pair. If using roles, you will also need to add the 
+Authorization::Roles plugin.
+
+See the SYNOPSIS for an example.
+
+=back
+
+=head1 INTERNAL METHODS
 
 =over 4
 
