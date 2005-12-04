@@ -145,7 +145,7 @@ as is. Otherwise C<< $c->get_user >> is used to retrieve it.
 
 C<$password> is a string.
 
-If C<$username> or C<$password> are not provided the query parameters 
+If C<$username> or C<$password> are not provided, the query parameters 
 C<login>, C<user>, C<username> and C<password>, C<passwd>, C<pass> will 
 be tried instead.
 

@@ -1,5 +1,9 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+0.04
+        - With User::Hash and Store::Minimal together session will store
+          userid, not actual user object
+
 0.03    2005-12-03 18:00:00
         - Added user_exists method.
 

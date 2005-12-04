@@ -40,8 +40,8 @@ METHODS
     user_exists
         Whether or not a user is logged in right now.
 
-        The reason this method exists is that "<$c-"user>> may needlessly
-        load the user from the auth store.
+        The reason this method exists is that "$c->user" may needlessly load
+        the user from the auth store.
 
         If you're just going to say
 
@@ -51,8 +51,8 @@ METHODS
                         $c->forward("login");
                 }
 
-        it should be more efficient than "<$c-"user>> when a user is marked
-        in the session but "$c->user" hasn't been called yet.
+        it should be more efficient than "$c->user" when a user is marked in
+        the session but "$c->user" hasn't been called yet.
 
     logout
         Delete the currently logged in user from "user" and the session.
@@ -141,6 +141,18 @@ SEE ALSO
     Catalyst::Plugin::Authorization::ACL,
     Catalyst::Plugin::Authorization::Roles.
 
+DON'T SEE ALSO
+    This module along with it's sub plugins deprecate a great number of
+    other modules. These include Catalyst::Plugin::Authentication::Simple,
+    Catalyst::Plugin::Authentication::CDBI.
+
+    At the time of writing these plugins have not yet been replaced or
+    updated, but should be eventually:
+    Catalyst::Plugin::Authentication::OpenID,
+    Catalyst::Plugin::Authentication::LDAP,
+    Catalyst::Plugin::Authentication::CDBI::Basic,
+    Catalyst::Plugin::Authentication::Basic::Remote
+
 AUTHORS
     Yuval Kogman, "nothingmuch@woobling.org"
 
@@ -148,7 +160,7 @@ AUTHORS
 
     David Kamholz
 
-COPYRIGHT & LICNESE
+COPYRIGHT & LICENSE
             Copyright (c) 2005 the aforementioned authors. All rights
             reserved. This program is free software; you can redistribute
             it and/or modify it under the same terms as Perl itself.

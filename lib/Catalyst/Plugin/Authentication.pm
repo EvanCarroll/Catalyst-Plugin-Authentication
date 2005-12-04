@@ -15,12 +15,14 @@ use warnings;
 use Tie::RefHash;
 use Class::Inspector;
 
+# this optimization breaks under Template::Toolkit
+# use user_exists instead
 #BEGIN {
 #	require constant;
 #	constant->import(have_want => eval { require Want });
 #}
 
-our $VERSION = "0.03";
+our $VERSION = "0.04";
 
 sub set_authenticated {
     my ( $c, $user ) = @_;
@@ -244,7 +246,7 @@ Returns the currently logged in user or undef if there is none.
 
 Whether or not a user is logged in right now.
 
-The reason this method exists is that C<<$c->user>> may needlessly load the
+The reason this method exists is that C<< $c->user >> may needlessly load the
 user from the auth store.
 
 If you're just going to say
@@ -255,7 +257,7 @@ If you're just going to say
 		$c->forward("login");
 	}
 
-it should be more efficient than C<<$c->user>> when a user is marked in the session
+it should be more efficient than C<< $c->user >> when a user is marked in the session
 but C<< $c->user >> hasn't been called yet.
 
 =item logout
@@ -378,6 +380,18 @@ L<Catalyst::Plugin::Authentication::Store::Minimal>,
 L<Catalyst::Plugin::Authorization::ACL>,
 L<Catalyst::Plugin::Authorization::Roles>.
 
+=head1 DON'T SEE ALSO
+
+This module along with it's sub plugins deprecate a great number of other
+modules. These include Catalyst::Plugin::Authentication::Simple,
+Catalyst::Plugin::Authentication::CDBI.
+
+At the time of writing these plugins have not yet been replaced or updated, but
+should be eventually: Catalyst::Plugin::Authentication::OpenID,
+Catalyst::Plugin::Authentication::LDAP,
+Catalyst::Plugin::Authentication::CDBI::Basic,
+Catalyst::Plugin::Authentication::Basic::Remote
+
 =head1 AUTHORS
 
 Yuval Kogman, C<nothingmuch@woobling.org>
@@ -386,7 +400,7 @@ Jess Robinson
 
 David Kamholz
 
-=head1 COPYRIGHT & LICNESE
+=head1 COPYRIGHT & LICENSE
 
         Copyright (c) 2005 the aforementioned authors. All rights
         reserved. This program is free software; you can redistribute

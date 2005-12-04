@@ -1,6 +1,6 @@
 ---
 name: Catalyst-Plugin-Authentication
-version: 0.03
+version: 0.04
 author: ~
 abstract: |-
   Infrastructure plugin for the Catalyst
@@ -12,7 +12,7 @@ requires:
 provides:
   Catalyst::Plugin::Authentication:
     file: lib/Catalyst/Plugin/Authentication.pm
-    version: 0.03
+    version: 0.04
   Catalyst::Plugin::Authentication::Credential::Password:
     file: lib/Catalyst/Plugin/Authentication/Credential/Password.pm
   Catalyst::Plugin::Authentication::Store::Minimal:

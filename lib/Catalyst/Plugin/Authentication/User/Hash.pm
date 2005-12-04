@@ -26,7 +26,7 @@ sub id {
 
 sub store {
     my $self = shift;
-    ref $self || $self;
+    $self->_accessor( "store", @_ ) || ref $self;
 }
 
 sub _accessor {
@@ -64,8 +64,7 @@ sub supports {
 
     # traverse the feature list,
     for (@spec) {
-        die "bad feature spec: @spec"
-          if ref($cursor) ne "HASH";
+        return if ref($cursor) ne "HASH";
         $cursor = $cursor->{$_};
     }
 
@@ -86,7 +85,7 @@ sub supports {
 
 sub for_session {
     my $self = shift;
-    return $self;    # let's hope we're serialization happy
+    return $self->store && $self->id || $self; # if we have a store and an ID we serialize by ref, otherwise we serialize the whole user
 }
 
 sub from_session {
