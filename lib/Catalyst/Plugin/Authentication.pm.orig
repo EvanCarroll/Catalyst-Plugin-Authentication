@@ -22,7 +22,7 @@ use Class::Inspector;
 #	constant->import(have_want => eval { require Want });
 #}
 
-our $VERSION = "0.05";
+our $VERSION = "0.04";
 
 sub set_authenticated {
     my ( $c, $user ) = @_;
@@ -397,7 +397,7 @@ leverage this. Add the role authorization plugin:
     sub restricted : Local {
         my ( $self, $c ) = @_;
 
-        $c->detach("unauthorized") unless $c->check_roles("admin");
+        $c->detach("unauthorized") unless $c->check_user_roles("admin");
 
         # do something restricted here
     }

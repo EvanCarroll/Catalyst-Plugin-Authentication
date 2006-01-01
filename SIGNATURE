@@ -14,15 +14,16 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 c847c2ac594cc4807ee40927582c62edd3f1f012 Build.PL
-SHA1 00a97b511ea77be87562d7338a0dc4c9e0940bae Catalyst-Plugin-Authentication-0.02.tar.gz
-SHA1 e3c4b079d23351e5ab72ae1699909b7cb9e1ee70 Changes
-SHA1 d6b8fd94e3166fc35114deeecefa8ff52128c583 MANIFEST
-SHA1 6653ed97df6b3a064b743d6829b5ef16e51a5d52 META.yml
-SHA1 3c74e0d0fa0ec7077ebff31d913ca0a2e5fb5723 Makefile.PL
-SHA1 d05747d42fe7e13df857f6be97f69c52b24212cd README
-SHA1 327ab0b3a5f1fa1e7a5339d95de84bcbdce87369 lib/Catalyst/Plugin/Authentication.pm
-SHA1 66597f95f188bf47e095f6ad6b6c276288dcb2d9 lib/Catalyst/Plugin/Authentication/Credential/Password.pm
+SHA1 63a9824e130f27e961724a160b8704736f6a839c Build.PL
+SHA1 a148a5197e4477f2d4cf9add6983ad06e280b982 Changes
+SHA1 8fd5496345c86d15d196e26fea72ba2a807dda16 MANIFEST
+SHA1 2ca5bd8ec747582fa258bc1b44cd9a1d8ac6735a META.yml
+SHA1 5e2a741a669ccd9ff01fa89fd860a9767a7f70c7 Makefile.PL
+SHA1 e59cf7d2c8e39e5efc5bca22765b0a145e537919 README
+SHA1 db654bf6cb81a0d1291f88132934ff468b9b2383 lib/Catalyst/Plugin/Authentication.pm
+SHA1 30d783edfc6548361db8acb469be6d94fdc38594 lib/Catalyst/Plugin/Authentication.pm.orig
+SHA1 59b59babcd1a264444bf1ed88e05737225ea1d53 lib/Catalyst/Plugin/Authentication.pm.rej
+SHA1 f43e7246284ad1172da6cacd4c5f3fcdedbaf877 lib/Catalyst/Plugin/Authentication/Credential/Password.pm
 SHA1 7ba1e614cf2fe422c779ecf8ebf18c74b0340d89 lib/Catalyst/Plugin/Authentication/Store.pod
 SHA1 33fb96114d8902a91b0ff667ea71980d637bb26b lib/Catalyst/Plugin/Authentication/Store/Minimal.pm
 SHA1 65399c1adf7bd287e592f79113d200d927cbde0e lib/Catalyst/Plugin/Authentication/Store/Minimal/Backend.pm
@@ -38,7 +39,7 @@ SHA1 e923679a1bbd8eb8f727e46f5906af25de27ec97 t/pod_coverage.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.1 (Darwin)
 
-iD8DBQFDk0rXVCwRwOvSdBgRAhhlAJ9NUHtjnq7uBM+0cMbcXJjopFXETACfWRuu
-KUEU3x9CHz46Wi0CQ1im5rE=
-=NwmE
+iD8DBQFDt8aBVCwRwOvSdBgRAsi9AJ9XDLSps+KEx0x/UegPso+40BZZxACghMZf
+ty2RX/YINdof5KnOg+vYQHw=
+=CByc
 -----END PGP SIGNATURE-----

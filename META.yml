@@ -1,6 +1,6 @@
 ---
 name: Catalyst-Plugin-Authentication
-version: 0.04
+version: 0.05
 author: ~
 abstract: |-
   Infrastructure plugin for the Catalyst
@@ -8,11 +8,12 @@ abstract: |-
 license: perl
 requires:
   Catalyst: 5.49
+  Class::Inspector: 0
   perl: 5.8.1
 provides:
   Catalyst::Plugin::Authentication:
     file: lib/Catalyst/Plugin/Authentication.pm
-    version: 0.04
+    version: 0.05
   Catalyst::Plugin::Authentication::Credential::Password:
     file: lib/Catalyst/Plugin/Authentication/Credential/Password.pm
   Catalyst::Plugin::Authentication::Store::Minimal:

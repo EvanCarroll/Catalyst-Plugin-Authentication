@@ -5,7 +5,8 @@ WriteMakefile
           'NAME' => 'Catalyst::Plugin::Authentication',
           'VERSION_FROM' => 'lib/Catalyst/Plugin/Authentication.pm',
           'PREREQ_PM' => {
-                           'Catalyst' => '5.49'
+                           'Catalyst' => '5.49',
+                           'Class::Inspector' => '0'
                          },
           'INSTALLDIRS' => 'site',
           'PL_FILES' => {}

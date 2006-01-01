@@ -1,7 +1,8 @@
 Build.PL
-Catalyst-Plugin-Authentication-0.02.tar.gz
 Changes
 lib/Catalyst/Plugin/Authentication.pm
+lib/Catalyst/Plugin/Authentication.pm.orig
+lib/Catalyst/Plugin/Authentication.pm.rej
 lib/Catalyst/Plugin/Authentication/Credential/Password.pm
 lib/Catalyst/Plugin/Authentication/Store.pod
 lib/Catalyst/Plugin/Authentication/Store/Minimal.pm

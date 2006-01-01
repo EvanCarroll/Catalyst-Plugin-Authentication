@@ -1,5 +1,9 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+0.05    2005-01-01 13:58:00
+        - Add debugging to Credential::Password
+        - Important doc fixes
+
 0.04
         - With User::Hash and Store::Minimal together session will store
           userid, not actual user object
