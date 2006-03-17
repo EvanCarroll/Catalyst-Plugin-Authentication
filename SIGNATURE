@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.50.
+signed via the Module::Signature module, version 0.52.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -15,31 +15,30 @@ not run its Makefile.PL or Build.PL.
 Hash: SHA1
 
 SHA1 63a9824e130f27e961724a160b8704736f6a839c Build.PL
-SHA1 a148a5197e4477f2d4cf9add6983ad06e280b982 Changes
-SHA1 8fd5496345c86d15d196e26fea72ba2a807dda16 MANIFEST
-SHA1 2ca5bd8ec747582fa258bc1b44cd9a1d8ac6735a META.yml
+SHA1 7fcc8b598c67e36e0cb8cc8c2931bf6b5d704583 Changes
+SHA1 6e686cdb467085491bb3ececcad8c6007b15625d MANIFEST
+SHA1 8aad7b6d8d2f14f2268d65a14b07d276625e7891 META.yml
 SHA1 5e2a741a669ccd9ff01fa89fd860a9767a7f70c7 Makefile.PL
+SHA1 2e1b787c8b6c5f4b5876973253f244f8fb761422 Password.pm.patch
 SHA1 e59cf7d2c8e39e5efc5bca22765b0a145e537919 README
-SHA1 db654bf6cb81a0d1291f88132934ff468b9b2383 lib/Catalyst/Plugin/Authentication.pm
-SHA1 30d783edfc6548361db8acb469be6d94fdc38594 lib/Catalyst/Plugin/Authentication.pm.orig
-SHA1 59b59babcd1a264444bf1ed88e05737225ea1d53 lib/Catalyst/Plugin/Authentication.pm.rej
-SHA1 f43e7246284ad1172da6cacd4c5f3fcdedbaf877 lib/Catalyst/Plugin/Authentication/Credential/Password.pm
+SHA1 ff2331c6c4b3a917f6cd596fab283b7a1e08b1a4 lib/Catalyst/Plugin/Authentication.pm
+SHA1 095cc5b501cf00ac43e0b738c35bba65a749bc43 lib/Catalyst/Plugin/Authentication/Credential/Password.pm
 SHA1 7ba1e614cf2fe422c779ecf8ebf18c74b0340d89 lib/Catalyst/Plugin/Authentication/Store.pod
 SHA1 33fb96114d8902a91b0ff667ea71980d637bb26b lib/Catalyst/Plugin/Authentication/Store/Minimal.pm
 SHA1 65399c1adf7bd287e592f79113d200d927cbde0e lib/Catalyst/Plugin/Authentication/Store/Minimal/Backend.pm
-SHA1 b3d543b4c855ca1ab7cd245fdcd21c9c0ed2f3c8 lib/Catalyst/Plugin/Authentication/User.pm
+SHA1 6e097cfcad88e8d9484212bca332d38a682bb9a6 lib/Catalyst/Plugin/Authentication/User.pm
 SHA1 b980615a276a7fb327bb9cc5a05e6ce9dd18c72f lib/Catalyst/Plugin/Authentication/User/Hash.pm
 SHA1 3b36d4055c058fd2177504f085bdf23d7e880a7e t/04_authentication.t
 SHA1 c1f005030777721898ecd416cee27e6828bba40f t/05_password.t
-SHA1 73fb491162aa37f82a4cf90a046265868981e19b t/06_user.t
-SHA1 237e09833971b567a605e9803852257aa6753c62 t/live_app.t
+SHA1 9f071480c4882ab910230d6fc0fc52834d5a8768 t/06_user.t
+SHA1 27d1ddc2c99fd4332c44c4e720ef637926edd555 t/live_app.t
 SHA1 61ad1dafe02c81c18c0f4fb7911dacee57ffb2aa t/live_app_session.t
 SHA1 86d255a7c9f065a13049108362c949b3e35a4c24 t/pod.t
 SHA1 e923679a1bbd8eb8f727e46f5906af25de27ec97 t/pod_coverage.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.1 (Darwin)
 
-iD8DBQFDt8aBVCwRwOvSdBgRAsi9AJ9XDLSps+KEx0x/UegPso+40BZZxACghMZf
-ty2RX/YINdof5KnOg+vYQHw=
-=CByc
+iD8DBQFEGvdVVCwRwOvSdBgRApNtAJ9JPdgPasM6Pfd9/tNBQDKeOCnmvgCdGeBp
+f/i+5OrfkOGg8wvMjB73BMw=
+=Rfz7
 -----END PGP SIGNATURE-----

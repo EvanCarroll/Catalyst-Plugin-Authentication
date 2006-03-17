@@ -10,7 +10,7 @@ use Catalyst::Exception ();
 use Digest              ();
 
 sub login {
-    my ( $c, $user, $password ) = @_;
+    my ( $c, $user, $password, @rest ) = @_;
 
     for ( $c->request ) {
         unless ( $user ||= $_->param("login")
@@ -18,7 +18,8 @@ sub login {
             || $_->param("username") )
         {
             $c->log->debug(
-                "Can't login a user without a user object or user ID param");
+                "Can't login a user without a user object or user ID param")
+                  if $c->debug;
             return;
         }
 
@@ -26,15 +27,16 @@ sub login {
             || $_->param("passwd")
             || $_->param("pass") )
         {
-            $c->log->debug("Can't login a user without a password");
+            $c->log->debug("Can't login a user without a password")
+              if $c->debug;
             return;
         }
     }
 
     unless ( Scalar::Util::blessed($user)
-        and $user->isa("Catalyst:::Plugin::Authentication::User") )
+        and $user->isa("Catalyst::Plugin::Authentication::User") )
     {
-        if ( my $user_obj = $c->get_user($user) ) {
+        if ( my $user_obj = $c->get_user( $user, $password, @rest ) ) {
             $user = $user_obj;
         }
         else {
@@ -52,8 +54,7 @@ sub login {
     }
     else {
         $c->log->debug(
-            "Failed to authenticate user '$user'. Reason: 'Incorrect password'"
-          )
+            "Failed to authenticate user '$user'. Reason: 'Incorrect password'")
           if $c->debug;
         return;
     }
@@ -76,11 +77,14 @@ sub _check_password {
         $d->add($password);
         $d->add( $user->password_post_salt || '' );
 
-        my $stored   = $user->hashed_password;
-        my $computed = $d->digest;
+        my $stored      = $user->hashed_password;
+        my $computed    = $d->clone()->digest;
+        my $b64computed = $d->clone()->b64digest;
 
         return ( ( $computed eq $stored )
-              || ( unpack( "H*", $computed ) eq $stored ) );
+              || ( unpack( "H*", $computed ) eq $stored )
+              || ( $b64computed eq $stored)
+              || ( $b64computed.'=' eq $stored) );
     }
     elsif ( $user->supports(qw/password salted_hash/) ) {
         require Crypt::SaltedHash;

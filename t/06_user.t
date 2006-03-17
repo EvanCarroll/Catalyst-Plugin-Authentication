@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 7;
+use Test::More tests => 6;
 use Test::Exception;
 
 my $m; BEGIN { use_ok($m = "Catalyst::Plugin::Authentication::User") }
@@ -35,10 +35,10 @@ ok( !$o->supports(qw/feature unsupported_subfeature/), "traversal terminating in
 
 lives_ok {
 	$o->supports("bad_key");
-} "cant check for non existent feature";
+} "can check for non existent feature";
 
-dies_ok {
-	$o->supports(qw/bad_key subfeature/)
-} "but can't traverse into one";
+#dies_ok {
+#	$o->supports(qw/bad_key subfeature/)
+#} "but can't traverse into one";
 
 

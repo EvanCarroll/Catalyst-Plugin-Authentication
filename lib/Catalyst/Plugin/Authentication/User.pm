@@ -16,7 +16,8 @@ sub supports {
 
     # traverse the feature list,
     for (@spec) {
-        die "bad feature spec: @spec" if ref($cursor) ne "HASH";
+        #die "bad feature spec: @spec" if ref($cursor) ne "HASH";
+        return if ref($cursor) ne "HASH";
 
         $cursor = $cursor->{$_};
     }

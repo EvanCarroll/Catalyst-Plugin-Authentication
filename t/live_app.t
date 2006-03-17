@@ -17,6 +17,7 @@ use Test::More 'no_plan';
 	use Test::Exception;
 
 	use Digest::MD5 qw/md5/;
+    use Digest::SHA1 qw/sha1_base64/;
 
 	our $users;
 
@@ -44,6 +45,14 @@ use Test::More 'no_plan';
 		is( $c->user, $users->{gorch}, "user object is in proper place");
 		$c->logout;
 
+		ok($c->login("shabaz", "s3cr3t"), "can login with base64 hashed");
+		is( $c->user, $users->{shabaz}, "user object is in proper place");
+		$c->logout;
+
+		ok($c->login("sadeek", "s3cr3t"), "can login with padded base64 hashed");
+		is( $c->user, $users->{sadeek}, "user object is in proper place");
+		$c->logout;
+
 		ok(!$c->login( "bar", "bad pass" ), "can't login with bad password");
 		ok(!$c->user, "no user");
 
@@ -63,6 +72,14 @@ use Test::More 'no_plan';
 			hashed_password => md5("s3cr3t"),
 			hash_algorithm => "MD5",
 		},
+        shabaz => {
+            hashed_password => sha1_base64("s3cr3t"),
+            hash_algorithm => "SHA-1"
+        },
+        sadeek => {
+            hashed_password => sha1_base64("s3cr3t").'=',
+            hash_algorithm => "SHA-1"
+        },
 		baz => {},
 	};
 

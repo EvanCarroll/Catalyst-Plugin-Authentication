@@ -22,7 +22,7 @@ use Class::Inspector;
 #	constant->import(have_want => eval { require Want });
 #}
 
-our $VERSION = "0.05";
+our $VERSION = "0.07";
 
 sub set_authenticated {
     my ( $c, $user ) = @_;
@@ -85,10 +85,10 @@ sub logout {
 }
 
 sub get_user {
-    my ( $c, $uid ) = @_;
+    my ( $c, $uid, @rest ) = @_;
 
     if ( my $store = $c->default_auth_store ) {
-        return $store->get_user($uid);
+        return $store->get_user( $uid, @rest );
     }
     else {
         Catalyst::Exception->throw(
