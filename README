@@ -150,7 +150,7 @@ EXAMPLE
         }
 
     Since the "login" method knows how to find logically named parameters on
-    it's own.
+    its own.
 
     The credential verifier will ask the default store to get the user whose
     ID is the user parameter. In this case the default store is the htpasswd

@@ -22,7 +22,7 @@ use Class::Inspector;
 #	constant->import(have_want => eval { require Want });
 #}
 
-our $VERSION = "0.07";
+our $VERSION = "0.08";
 
 sub set_authenticated {
     my ( $c, $user ) = @_;
@@ -47,19 +47,27 @@ sub user {
         return $c->_user(@_);
     }
 
-    my $user = $c->_user;
-
-    if ( $user and !Scalar::Util::blessed($user) ) {
-#		return 1 if have_want() && Want::want("BOOL");
-        return $c->auth_restore_user($user);
+    if ( defined(my $user = $c->_user) ) {
+        return $user;
+    } else {
+        my $frozen = $c->_user_in_session;
+        return $c->auth_restore_user($frozen);
     }
-
-    return $user;
 }
 
 sub user_exists {
 	my $c = shift;
-	return defined($c->_user);
+	return defined($c->_user) || defined($c->_user_in_session);
+}
+
+sub _user_in_session {
+    my $c = shift;
+
+    if ( $c->isa("Catalyst::Plugin::Session") and $c->session_is_valid ) {
+        return $c->session->{__user};
+    }
+
+    return;
 }
 
 sub save_user_in_session {
@@ -95,20 +103,6 @@ sub get_user {
                 "The user id $uid was passed to an authentication "
               . "plugin, but no default store was specified" );
     }
-}
-
-sub prepare {
-    my $c = shift->NEXT::prepare(@_);
-
-    if ( $c->isa("Catalyst::Plugin::Session")
-        and !$c->user )
-    {
-        if ( $c->sessionid and my $frozen_user = $c->session->{__user} ) {
-            $c->_user($frozen_user);
-        }
-    }
-
-    return $c;
 }
 
 sub auth_restore_user {
@@ -357,7 +351,7 @@ It could be simplified though:
         }
     }
 
-Since the C<login> method knows how to find logically named parameters on it's
+Since the C<login> method knows how to find logically named parameters on its
 own.
 
 The credential verifier will ask the default store to get the user whose ID is

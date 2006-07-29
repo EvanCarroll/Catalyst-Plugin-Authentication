@@ -1,4 +1,3 @@
-Build.PL
 Changes
 lib/Catalyst/Plugin/Authentication.pm
 lib/Catalyst/Plugin/Authentication/Credential/Password.pm
@@ -15,8 +14,9 @@ README
 t/04_authentication.t
 t/05_password.t
 t/06_user.t
+t/lib/AuthSessionTestApp.pm
+t/lib/AuthTestApp.pm
 t/live_app.t
 t/live_app_session.t
 t/pod.t
 t/pod_coverage.t
-SIGNATURE    Added here by Module::Build
