@@ -20,3 +20,4 @@ t/live_app.t
 t/live_app_session.t
 t/pod.t
 t/pod_coverage.t
+SIGNATURE    Added here by Module::Build

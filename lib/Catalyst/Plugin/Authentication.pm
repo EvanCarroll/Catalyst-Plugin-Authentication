@@ -22,7 +22,7 @@ use Class::Inspector;
 #	constant->import(have_want => eval { require Want });
 #}
 
-our $VERSION = "0.08";
+our $VERSION = "0.09";
 
 sub set_authenticated {
     my ( $c, $user ) = @_;
@@ -50,24 +50,13 @@ sub user {
     if ( defined(my $user = $c->_user) ) {
         return $user;
     } else {
-        my $frozen = $c->_user_in_session;
-        return $c->auth_restore_user($frozen);
+        return $c->auth_restore_user;
     }
 }
 
 sub user_exists {
 	my $c = shift;
 	return defined($c->_user) || defined($c->_user_in_session);
-}
-
-sub _user_in_session {
-    my $c = shift;
-
-    if ( $c->isa("Catalyst::Plugin::Session") and $c->session_is_valid ) {
-        return $c->session->{__user};
-    }
-
-    return;
 }
 
 sub save_user_in_session {
@@ -83,9 +72,11 @@ sub logout {
 
     $c->user(undef);
 
-    if (    $c->isa("Catalyst::Plugin::Session")
-        and $c->config->{authentication}{use_session} )
-    {
+    if (
+        $c->isa("Catalyst::Plugin::Session")
+        and $c->config->{authentication}{use_session}
+        and $c->session_is_valid
+    ) {
         delete @{ $c->session }{qw/__user __user_store/};
     }
     
@@ -105,16 +96,27 @@ sub get_user {
     }
 }
 
+sub _user_in_session {
+    my $c = shift;
+
+    return unless
+        $c->isa("Catalyst::Plugin::Session")
+        and $c->config->{authentication}{use_session}
+        and $c->session_is_valid;
+
+    return $c->session->{__user};
+
+    return;
+}
+
 sub auth_restore_user {
     my ( $c, $frozen_user, $store_name ) = @_;
 
-    return
-      unless $c->isa("Catalyst::Plugin::Session")
-      and $c->config->{authentication}{use_session}
-      and $c->sessionid;
+    $frozen_user ||= $c->_user_in_session;
+    return unless defined($frozen_user);
 
     $store_name  ||= $c->session->{__user_store};
-    $frozen_user ||= $c->session->{__user};
+    return unless $store_name; # FIXME die unless? This is an internal inconsistency
 
     my $store = $c->get_auth_store($store_name);
     $c->_user( my $user = $store->from_session( $c, $frozen_user ) );

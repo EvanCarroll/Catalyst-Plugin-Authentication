@@ -39,15 +39,33 @@ sub elk : Local {
 	ok( $c->user_exists, "user exists" );
 	ok( $c->user, "a user was also restored");
 	is_deeply( $c->user, $users->{foo}, "restored user is the right one (deep test - store might change identity)" );
-
-	$c->delete_session("bah");
+    
+    $c->logout;
 }
 
 sub fluffy_bunny : Local {
 	my ( $self, $c ) = @_;
 
-	ok( !$c->session_is_valid, "no session ID was restored");
+	ok( $c->session_is_valid, "no session ID was restored");
 	ok( !$c->user, "no user was restored");
+	
+    $c->delete_session("bah");
+}
+
+sub possum : Local {
+    my ( $self, $c ) = @_;
+
+	ok( !$c->session_is_valid, "no session ID was restored");
+    $c->session->{definitely_not_a_user} = "moose";
+
+}
+
+sub butterfly : Local {
+    my ( $self, $c ) = @_;
+
+    ok( $c->session_is_valid, "valid session" );
+    ok( !$c->user_exists, "but no user exists" );
+    ok( !$c->user, "no user object either" );
 }
 
 __PACKAGE__->config->{authentication}{users} = $users = {
