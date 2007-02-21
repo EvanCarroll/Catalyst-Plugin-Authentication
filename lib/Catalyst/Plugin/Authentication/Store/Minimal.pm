@@ -5,14 +5,88 @@ package Catalyst::Plugin::Authentication::Store::Minimal;
 use strict;
 use warnings;
 
-use Catalyst::Plugin::Authentication::Store::Minimal::Backend;
+use Catalyst::Plugin::Authentication::User::Hash;
+use Scalar::Util ();
+use base qw/Class::Accessor::Fast/;
 
+BEGIN {
+    __PACKAGE__->mk_accessors(qw/userhash/);
+}
+
+sub new {
+    my ( $class, $config, $app) = @_;
+
+    bless { userhash => $config->{'users'} }, $class;
+}
+
+sub from_session {
+	my ( $self, $c, $id ) = @_;
+
+	return $id if ref $id;
+
+	$self->find_user( { id => $id } );
+}
+
+## this is not necessarily a good example of what find_user can do, since all we do is   
+## look up with the id anyway.  find_user can be used to locate a user based on other 
+## combinations of data.  See C::P::Authentication::Store::DBIx::Class for a better example
+sub find_user {
+    my ( $self, $userinfo, $c ) = @_;
+
+    my $id = $userinfo->{'id'};
+    
+    $id ||= $userinfo->{'username'};
+    
+    return unless exists $self->userhash->{$id};
+
+    my $user = $self->userhash->{$id};
+
+    if ( ref $user ) {
+        if ( ref $user eq "HASH" ) {
+            $user->{id} ||= $id;
+            return bless $user, "Catalyst::Plugin::Authentication::User::Hash";
+        }
+        else {
+            Catalyst::Exception->throw( "The user '$id' is a reference of type "
+                  . ref($user)
+                  . " but should be a HASH" );
+        }
+    }
+    else {
+        Catalyst::Exception->throw(
+            "The user '$id' is has to be a hash reference or an object");
+    }
+
+    return $user;
+}
+
+sub user_supports {
+    my $self = shift;
+
+    # choose a random user
+    scalar keys %{ $self->userhash };
+    ( undef, my $user ) = each %{ $self->userhash };
+
+    $user->supports(@_);
+}
+
+## Backwards compatibility
+#
+# This is a backwards compatible routine.  get_user is specifically for loading a user by it's unique id
+# find_user is capable of doing the same by simply passing { id => $id }  
+# no new code should be written using get_user as it is deprecated.
+sub get_user {
+    my ( $self, $id ) = @_;
+    $self->find_user({id => $id});
+}
+
+## backwards compatibility
 sub setup {
     my $c = shift;
 
     $c->default_auth_store(
-        Catalyst::Plugin::Authentication::Store::Minimal::Backend->new(
-            $c->config->{authentication}{users}
+        __PACKAGE__->new( 
+            $c->config->{authentication}, $c
         )
     );
 
@@ -27,34 +101,52 @@ __END__
 
 =head1 NAME
 
-Catalyst::Plugin::Authentication::Store::Minimal - Authentication
-database in C<< $c->config >>.
+Catalyst::Plugin::Authentication::Store::Minimal - Minimal
+authentication store.
 
 =head1 SYNOPSIS
 
+    # you probably just want Store::Minimal under most cases,
+    # but if you insist you can instantiate your own store:
+
+    use Catalyst::Plugin::Authentication::Store::Minimal;
+
     use Catalyst qw/
-      Authentication
-      Authentication::Store::Minimal
-      Authentication::Credential::Password
-      /;
+        Authentication
+    /;
 
-    __PACKAGE__->config->{authentication}{users} = {
-        name => {
-            password => "s3cr3t",
-            roles    => [qw/admin editor/],
-            ...
-        },
-    };
+    __PACKAGE__->config->{authentication} = 
+                    {  
+                        default_realm => 'members',
+                        realms => {
+                            members => {
+                                credential => {
+                                    class => 'Password',
+                                    password_field => 'password',
+                                    password_type => 'clear'
+                                },
+                                store => {
+                                    class => 'Minimal',
+                	                users = {
+                	                    bob => {
+                	                        password => "s00p3r",                	                    
+                	                        editor => 'yes',
+                	                        roles => [qw/edit delete/],
+                	                    },
+                	                    william => {
+                	                        password => "s3cr3t",
+                	                        roles => [qw/comment/],
+                	                    }
+                	                }	                
+                	            }
+                	        }
+                    	}
+                    };
 
-    sub login : Global {
-        my ( $self, $c ) = @_;
-
-        $c->login( $c->req->param("login"), $c->req->param("password"), );
-    }
-
+    
 =head1 DESCRIPTION
 
-This authentication store plugin lets you create a very quick and dirty user
+This authentication store lets you create a very quick and dirty user
 database in your application's config hash.
 
 You will need to include the Authentication plugin, and at least one Credential
@@ -70,6 +162,14 @@ at runtime.
 
 =over 4
 
+=item class 
+
+The classname used for the store. This is part of
+L<Catalyst::Plugin::Authentication> and is the method by which
+Catalyst::Plugin::Authentication::Store::Minimal is loaded as the
+user store. For this module to be used, this must be set to
+'Minimal'.
+
 =item users
 
 This is a simple hash of users, the keys are the usenames, and the values are
@@ -81,14 +181,35 @@ See the SYNOPSIS for an example.
 
 =back
 
-=head1 INTERNAL METHODS
+=head1 METHODS
+
+There are no publicly exported routines in the Minimal store (or indeed in
+most authentication stores)  However, below is a description of the routines 
+required by L<Catalyst::Plugin::Authentication> for all authentication stores.
 
 =over 4
 
-=item setup
+=item new ( $config, $app )
 
-This method will popultate C<< $c->config->{authentication}{store} >> so that
-L<Catalyst::Plugin::Authentication/default_auth_store> can use it.
+Constructs a new store object, which uses the user element of the supplied config 
+hash ref as it's backing structure.
+
+=item find_user ( $authinfo, $c ) 
+
+Keys the hash by the 'id' or 'username' element in the authinfo hash and returns the user.
+
+... documentation fairy stopped here. ...
+
+If the return value is unblessed it will be blessed as
+L<Catalyst::Plugin::Authentication::User::Hash>.
+
+=item from_session $id
+
+Delegates to C<get_user>.
+
+=item user_supports
+
+Chooses a random user from the hash and delegates to it.
 
 =back
 
