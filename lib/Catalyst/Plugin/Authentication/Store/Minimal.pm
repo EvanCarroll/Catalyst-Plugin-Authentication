@@ -42,6 +42,11 @@ sub find_user {
     my $user = $self->userhash->{$id};
 
     if ( ref $user ) {
+        if (     Scalar::Util::blessed($user) 
+             and $user->isa('Catalyst::Plugin::Authentication::User::Hash') ) 
+        {
+            return $user;
+        }
         if ( ref $user eq "HASH" ) {
             $user->{id} ||= $id;
             return bless $user, "Catalyst::Plugin::Authentication::User::Hash";

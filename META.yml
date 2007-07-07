@@ -1,14 +1,13 @@
---- #YAML:1.0
-name:                Catalyst-Plugin-Authentication
-version:             0.09999_01
-abstract:            ~
-license:             ~
-generated_by:        ExtUtils::MakeMaker version 6.31
-distribution_type:   module
-requires:     
+# http://module-build.sourceforge.net/META-spec.html
+#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
+name:         Catalyst-Plugin-Authentication
+version:      0.09999_02
+version_from: lib/Catalyst/Plugin/Authentication.pm
+installdirs:  site
+requires:
     Catalyst:                      5.49
     Catalyst::Plugin::Session:     0.10
     Class::Inspector:              0
-meta-spec:
-    url:     http://module-build.sourceforge.net/META-spec-v1.2.html
-    version: 1.2
+
+distribution_type: module
+generated_by: ExtUtils::MakeMaker version 6.17

@@ -8,7 +8,7 @@ use base qw/Class::Accessor::Fast/;
 
 ## auth_realm is the realm this user came from. 
 BEGIN {
-    __PACKAGE__->mk_accessors(qw/auth_realm/);
+    __PACKAGE__->mk_accessors(qw/auth_realm store/);
 }
 
 ## THIS IS NOT A COMPLETE CLASS! it is intended to provide base functionality only.  
@@ -49,7 +49,7 @@ sub get {
     my ($self, $field) = @_;
     
     my $object;
-    if ($object = $self->get_object && $object->can($field)) {
+    if ($object = $self->get_object and $object->can($field)) {
         return $object->$field();
     } else {
         return undef;
@@ -68,10 +68,11 @@ sub get_object {
 
 ## Backwards Compatibility
 ## you probably want auth_realm, in fact.  but this does work for backwards compatibility.
-sub store { 
-    my ($self) = @_;
-    return $self->auth_realm->{store};
-}
+## store should be a read-write accessor - so it was moved to mk_accessors
+##sub store { 
+##    my ($self) = @_;
+##    return $self->auth_realm->{store};
+##}
 
 __PACKAGE__;
 

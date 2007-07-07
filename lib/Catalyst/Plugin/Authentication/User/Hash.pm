@@ -19,6 +19,9 @@ sub AUTOLOAD {
     $self->_accessor( $key, @_ );
 }
 
+# this class effectively handles any method calls
+sub can { 1 }
+
 sub id {
     my $self = shift;
     $self->_accessor( "id", @_ );
@@ -87,7 +90,8 @@ sub supports {
 
 sub for_session {
     my $self = shift;
-    return $self->store && $self->id || $self; # if we have a store and an ID we serialize by ref, otherwise we serialize the whole user
+    
+    return $self; # we serialize the whole user
 }
 
 sub from_session {

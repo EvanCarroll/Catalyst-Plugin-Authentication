@@ -32,7 +32,101 @@ is required to implement a credential or a store.
 
 There are two main entry points you need to be aware of when writing a store
 or credential module. The first is initialization and the second is during the
-actual call to the Catalyst application's authenticate method.
+actual call to the Catalyst application's authenticate method.  
+
+A simplified description of the authentication process follows:
+
+
+
+B<Initialization>
+
+=over 4
+
+B<Realm Setup> - for each realm:
+
+=over 4
+
+1) The Store is instantiated using new() method
+
+2) The Credential Instantiated using new() method
+
+3) Credential and Store objects tied to realm for use during requests
+
+=back
+
+=back
+
+B<Authentication>
+
+=over 4
+
+C<< $c->authenticate( $userinfo, $realm ) >> called
+
+=over 4
+
+1) Credential / Store objects retrieved for realm provided
+
+2) Credential's authenticate() method called
+
+=over 4 
+
+The realm's store object and the authinfo hash provided to the
+credential object's authenticate call. In most cases the
+credential object will attempt to retrieve a user from the store
+provided by using the Store's find_user() method. It will then
+usually compare the retrieved user's information with the
+information provided in the $authinfo hash. This is how the
+default 'Password' credential functions. If the credentials match,
+the authenticate() method should return a user object.
+
+=back
+
+3) User object stored in session
+
+=over 4
+
+If the user object supports session storage, the successfully
+authenticated user will be placed in session storage. This is done
+by calling the store object's for_session() method, which should
+return serialized data (IE a scalar). This serialized data is
+passed back to the store via the from_session() method, so the
+data should contain enough information for the store to recreate /
+reload the user.
+
+=back
+
+=back
+
+=back
+
+B<Sessions> - Per-Request operations
+
+=over 4
+
+When any user-related activity occurs, and $c->authenticate has not
+yet been called, the Catalyst::Plugin::Authentication module will
+attempt to restore the user from the session (if one is available).
+There is only one step in this process: 
+
+=over 4
+
+1) Store object's from_session() is called
+
+=back 
+    
+The serialized data previously returned by the store's for_session()
+method is provided to the from_session() method. The from_session()
+method should return a valid user object.
+
+Note that the for_session() is only called during the original
+$c->authenticate() call, so if changes are made to the user that need
+to be reflected in your session data, you will want to call the
+$c->save_user_in_session() method - which will perform the session
+storage process again (complete with call to for_session()).
+
+=back
+
+More detailed information about these processes is below.
 
 =head2 INITIALIZATION
 
@@ -43,12 +137,12 @@ L<Catalyst::Plugin::Authentication|Catalyst::Plugin::Authentication>
 instantiates both a new credential object and a new store object. See below
 for the details of how credentials and stores are instantiated.
 
-    NOTE: The instances created will remain active throughout the entire 
-    lifetime of the application, and so should be relatively lightweight. 
-    Care should be taken to ensure that they do not grow, or retain 
-    information per request, because they will be involved in each 
-    authentication request and could therefore substantially
-    hurt memory consumption over time.  
+B<NOTE>: The instances created will remain active throughout the entire 
+lifetime of the application, and so should be relatively lightweight. 
+Care should be taken to ensure that they do not grow, or retain 
+information per request, because they will be involved in each 
+authentication request and could therefore substantially
+hurt memory consumption over time.  
 
 =head2 AUTHENTICATION
 
@@ -106,12 +200,12 @@ first argument, C<$config>, is a hash reference containing the configuration
 information for the store module. The second argument is a reference to the
 Catalyst application.
 
-    Note that when new() is called, Catalyst has not yet loaded 
-    the various controller and model classes, nor is it definite
-    that other plugins have been loaded, so your new() method 
-    must not rely on any of those being present.  If any of 
-    this is required for your store to function, you should
-    defer that part of initialization until the first method call. 
+Note that when new() is called, Catalyst has not yet loaded 
+the various controller and model classes, nor is it definite
+that other plugins have been loaded, so your new() method 
+must not rely on any of those being present.  If any of 
+this is required for your store to function, you should
+defer that part of initialization until the first method call. 
 
 The C<new()> method should return a blessed reference to your store object.
 
@@ -167,7 +261,7 @@ applications that may provide advanced functionality based on whether the
 underlying user object can do certain things. In most cases you will want to
 pass this directly to the underlying user class' C<supports> method. Note that 
 this is used as a B<class> method against the user class and therefore must 
-be able to function without an instantiated user object.
+be able to function without an instantiated user object. 
 
 =back
 
@@ -204,11 +298,23 @@ retreive this user from the store.  Often this will be provided to the store's
 C<find_user()> routine as C<id =E<gt> $user-E<gt>id> so you should ensure that your 
 store's C<find_user()> can cope with that. 
 
-=item supports_features( )
+=item supports( $feature, $subfeature ... )
 
-This method should return a hashref of 'extra' features supported. This is for
-more flexible integration with some Credentials / applications. It is not
-required that you support anything, and returning C<undef> is perfectly
+This method checks to see if the user class supports a particular feature.  It
+is implemented such that each argument provides a subfeature of the previous 
+argument. In other words, passing 'foo', 'bar'  would return true if the user
+supported the 'foo' feature, and the 'bar' feature of 'foo'.   This is implemented
+in Catalyst::Plugin::Authentication::User, so if your class inherits from that, you
+do not need to implement this and can instead implement supported_features(). 
+
+B<Note:> If you want the authentication module to be able to save your user in
+the session you must return true when presented with the feature 'session'.
+
+=item supported_features( )
+
+This method should return a hashref of features supported by the user class.
+This is for more flexible integration with some Credentials / applications. It
+is not required that you support anything, and returning C<undef> is perfectly
 acceptable and in most cases what you will do.
 
 =item get( $fieldname )
@@ -219,12 +325,12 @@ access the underlying storage mechanism for the user data and return the
 information. This is used as a standard method of accessing an authenticated
 user's data, and MUST be implemented by all user objects.  
 
-    Note: There is no equivalent 'set' method. Each user class is 
-    likely to vary greatly in how data must be saved and it is 
-    therefore impractical to try to provide a standard way of 
-    accomplishing it. When an application developer needs to save 
-    data, they should obtain the underlying object / data by 
-    calling get_object, and work with it directly.
+B<Note>: There is no equivalent 'set' method. Each user class is 
+likely to vary greatly in how data must be saved and it is 
+therefore impractical to try to provide a standard way of 
+accomplishing it. When an application developer needs to save 
+data, they should obtain the underlying object / data by 
+calling get_object, and work with it directly.
     
 
 =item get_object( )
@@ -262,8 +368,8 @@ first argument, C<$config>, is a hash reference containing the configuration
 information for the credential module. The second argument is a reference 
 to the Catalyst application.
 
-    Again, when the credential's new() method is called, Catalyst 
-    has not yet loaded the various controller and model classes. 
+Again, when the credential's new() method is called, Catalyst 
+has not yet loaded the various controller and model classes. 
 
 The new method should perform any necessary setup required and instantiate 
 your credential object.  It should return your instantiated credential.
