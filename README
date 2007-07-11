@@ -151,7 +151,7 @@ EXAMPLE
                             }
                             }
                     };
-
+    
     This tells the authentication plugin what realms are available, which
     credential and store modules are used, and the configuration of each.
     With this code loaded, we can now attempt to authenticate users.
@@ -296,23 +296,20 @@ CONFIGURATION
                                         authserver => '192.168.10.17'
                                     }
                                 }
-                                
-                        }
+                        
+                                }
                         };
 
-        use_session
-
+    use_session
         Whether or not to store the user's logged in state in the session,
         if the application is also using Catalyst::Plugin::Session. This
         value is set to true per default.
 
-        default_realm
-
+    default_realm
         This defines which realm should be used as when no realm is provided
         to methods that require a realm such as authenticate or find_user.
 
-        realms
-
+    realms
         This contains the series of realm configurations you want to use for
         your app. The only rule here is that there must be at least one. A
         realm consists of a name, which is used to reference the realm, a
@@ -393,7 +390,7 @@ INTERNAL METHODS
     get_auth_realm ( $realmname )
         Retrieves the realm instance for the realmname provided.
 
-
+    *
 
 SEE ALSO
     This list might not be up to date. Below are modules known to work with
@@ -502,12 +499,4 @@ COPYRIGHT & LICENSE
             Copyright (c) 2005 the aforementioned authors. All rights
             reserved. This program is free software; you can redistribute
             it and/or modify it under the same terms as Perl itself.
-
-POD ERRORS
-    Hey! The above document had some coding errors, which are explained
-    below:
-
-    Around line 672:
-        You can't have =items (as at line 706) unless the first thing after
-        the =over is an =item
 

@@ -1,16 +1,19 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
-0.09999_01	
+XXX     2007-04-26
+        - switch to Module::Install
+
+0.09999_01 2007-02-21
         - major changes to the internals of the plugin, to better encapsulate
           credentials and stores.
         - introduction of 'realms' concept, allowing multiple different
           pairs of credential and store in a single application.
 
-0.09
+0.09    2006-08-01
         - be a bit more pedantic about checking values for definedness before
           invoking methods on them
 
-0.08
+0.08    2006-07-29
         - factor test applications out to files due to changes in Catalyst::Test
         - don't load session at prepare time unless necessary
 

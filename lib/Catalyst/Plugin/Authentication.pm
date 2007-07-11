@@ -21,7 +21,7 @@ use Class::Inspector;
 #	constant->import(have_want => eval { require Want });
 #}
 
-our $VERSION = "0.09999_02";
+our $VERSION = "0.10000";
 
 sub set_authenticated {
     my ( $c, $user, $realmname ) = @_;
@@ -192,12 +192,19 @@ sub _authentication_initialize {
         }
     } else {
         
-        ## BACKWARDS COMPATIBILITY - if realm is not defined - then we are probably dealing
+        ## BACKWARDS COMPATIBILITY - if realms is not defined - then we are probably dealing
         ## with an old-school config.  The only caveat here is that we must add a classname
         
+        ## also - we have to treat {store} as {stores}{default} - because 
+        ## while it is not a clear as a valid config in the docs, it 
+        ## is functional with the old api. Whee!
+        if (exists($cfg->{'store'}) && !exists($cfg->{'stores'}{'default'})) {
+            $cfg->{'stores'}{'default'} = $cfg->{'store'};
+        }
+
         foreach my $storename (keys %{$cfg->{'stores'}}) {
             my $realmcfg = {
-                store => $cfg->{'stores'}{$storename},
+                store => { class => $cfg->{'stores'}{$storename} },
             };
             $app->setup_auth_realm($storename, $realmcfg);
         }
@@ -228,7 +235,7 @@ sub setup_auth_realm {
 
     # a little niceness - since most systems seem to use the password credential class, 
     # if no credential class is specified we use password.
-    $config->{credential}{class} ||= "Catalyst::Plugin::Authentication::Credential::Password";
+    $config->{credential}{class} ||= '+Catalyst::Plugin::Authentication::Credential::Password';
 
     my $credentialclass = $config->{'credential'}{'class'};
     
@@ -256,8 +263,20 @@ sub setup_auth_realm {
                                             };
     }
     
-    $app->auth_realms->{$realmname}{'store'} = $storeclass->new($config->{'store'}, $app);
-    $app->auth_realms->{$realmname}{'credential'} = $credentialclass->new($config->{'credential'}, $app);
+    ## a little cruft to stay compatible with some poorly written stores / credentials
+    ## we'll remove this soon.
+    if ($storeclass->can('new')) {
+        $app->auth_realms->{$realmname}{'store'} = $storeclass->new($config->{'store'}, $app);
+    } else {
+        $app->log->error("THIS IS DEPRECATED: $storeclass has no new() method - Attempting to use uninstantiated");
+        $app->auth_realms->{$realmname}{'store'} = $storeclass;
+    }
+    if ($credentialclass->can('new')) {
+        $app->auth_realms->{$realmname}{'credential'} = $credentialclass->new($config->{'credential'}, $app);
+    } else {
+        $app->log->error("THIS IS DEPRECATED: $credentialclass has no new() method - Attempting to use uninstantiated");
+        $app->auth_realms->{$realmname}{'credential'} = $credentialclass;
+    }
 }
 
 sub auth_realms {
@@ -338,7 +357,13 @@ sub default_auth_store {
 
     if ( my $new = shift ) {
         $self->auth_realms->{'default'}{'store'} = $new;
-        my $storeclass = ref($new);
+        
+        my $storeclass;
+        if (ref($new)) {
+            $storeclass = ref($new);
+        } else {
+            $storeclass = $new;
+        }
         
         # BACKWARDS COMPATIBILITY - if the store class does not define find_user, we define it in terms 
         # of get_user and add it to the class.  this is because the auth routines use find_user, 
