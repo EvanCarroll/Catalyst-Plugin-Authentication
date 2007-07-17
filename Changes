@@ -1,5 +1,9 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+0.10000 2007-07-11
+        - Minor updates to work better with compatibility mode
+        - Producion release
+
 XXX     2007-04-26
         - switch to Module::Install
 

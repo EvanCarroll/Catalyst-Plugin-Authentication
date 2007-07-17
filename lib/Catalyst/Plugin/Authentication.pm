@@ -21,7 +21,7 @@ use Class::Inspector;
 #	constant->import(have_want => eval { require Want });
 #}
 
-our $VERSION = "0.10000";
+our $VERSION = "0.10001";
 
 sub set_authenticated {
     my ( $c, $user, $realmname ) = @_;

@@ -1,4 +1,4 @@
-use inc::Module::Install 0.65;
+use inc::Module::Install 0.67;
 
 name 'Catalyst-Plugin-Authentication';
 all_from 'lib/Catalyst/Plugin/Authentication.pm';
