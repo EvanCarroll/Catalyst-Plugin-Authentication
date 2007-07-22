@@ -21,7 +21,7 @@ use Class::Inspector;
 #	constant->import(have_want => eval { require Want });
 #}
 
-our $VERSION = "0.10001";
+our $VERSION = "0.10002";
 
 sub set_authenticated {
     my ( $c, $user, $realmname ) = @_;
@@ -40,7 +40,6 @@ sub set_authenticated {
         $c->save_user_in_session($user, $realmname);
     }
     $user->auth_realm($realmname);
-    $user->store(ref($c->auth_realms->{$realmname}{'store'}));
     
     $c->NEXT::set_authenticated($user, $realmname);
 }
@@ -150,10 +149,7 @@ sub auth_restore_user {
     
     # this sets the realm the user originated in.
     $user->auth_realm($realmname);
-    ## compatibility - some pre 0.10 store / credentials may need the store name,
-    ## this is not used by the current api in any form.
-    $user->store(ref($c->auth_realms->{$realmname}{'store'}));
-    
+        
     return $user;
 
 }

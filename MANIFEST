@@ -15,7 +15,6 @@ lib/Catalyst/Plugin/Authentication/Credential/Password.pm
 lib/Catalyst/Plugin/Authentication/Internals.pod
 lib/Catalyst/Plugin/Authentication/Store.pod
 lib/Catalyst/Plugin/Authentication/Store/Minimal.pm
-lib/Catalyst/Plugin/Authentication/Store/Old-Minimal.pm
 lib/Catalyst/Plugin/Authentication/User.pm
 lib/Catalyst/Plugin/Authentication/User/Hash.pm
 Makefile.PL
