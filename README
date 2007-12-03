@@ -71,7 +71,8 @@ INTRODUCTION
    Realms
     Configuration of the Catalyst::Plugin::Authentication framework is done
     in terms of realms. In simplest terms, a realm is a pairing of a
-    Credential verifier and a User storage (Store) backend.
+    Credential verifier and a User storage (Store) backend. As of version
+    0.10003, realms are now objects that you can create and customize.
 
     An application can have any number of Realms, each of which operates
     independant of the others. Each realm has a name, which is used to
@@ -151,7 +152,7 @@ EXAMPLE
                             }
                             }
                     };
-    
+
     This tells the authentication plugin what realms are available, which
     credential and store modules are used, and the configuration of each.
     With this code loaded, we can now attempt to authenticate users.
@@ -220,9 +221,9 @@ EXAMPLE
     specified.)
 
     The above example is somewhat similar to role based access control.
-    Catalyst::Plugin::Authentication::Store::Minimal treats the roles field
-    as an array of role names. Let's leverage this. Add the role
-    authorization plugin:
+    Catalyst::Authentication::Store::Minimal treats the roles field as an
+    array of role names. Let's leverage this. Add the role authorization
+    plugin:
 
         use Catalyst qw/
             ...
@@ -268,37 +269,37 @@ EXAMPLE
     the new source. The rest of your application is completely unchanged.
 
 CONFIGURATION
-            # example
-            __PACKAGE__->config->{authentication} = 
-                        {  
-                            default_realm => 'members',
-                            realms => {
-                                members => {
-                                    credential => {
-                                        class => 'Password',
-                                        password_field => 'password',
-                                        password_type => 'clear'
-                                    },
-                                    store => {
-                                        class => 'DBIx::Class',
-                                            user_class => 'MyApp::Users',
-                                            role_column => 'roles'                      
-                                        }
+        # example
+        __PACKAGE__->config->{authentication} = 
+                    {  
+                        default_realm => 'members',
+                        realms => {
+                            members => {
+                                credential => {
+                                    class => 'Password',
+                                    password_field => 'password',
+                                    password_type => 'clear'
                                 },
-                                admins => {
-                                    credential => {
-                                        class => 'Password',
-                                        password_field => 'password',
-                                        password_type => 'clear'
-                                    },
-                                    store => {
-                                        class => '+MyApp::Authentication::Store::NetAuth',
-                                        authserver => '192.168.10.17'
+                                store => {
+                                    class => 'DBIx::Class',
+                                        user_class => 'MyApp::Users',
+                                        role_column => 'roles'                      
                                     }
+                            },
+                            admins => {
+                                credential => {
+                                    class => 'Password',
+                                    password_field => 'password',
+                                    password_type => 'clear'
+                                },
+                                store => {
+                                    class => '+MyApp::Authentication::Store::NetAuth',
+                                    authserver => '192.168.10.17'
                                 }
-                        
-                                }
-                        };
+                            }
+                            
+                        }
+                    };
 
     use_session
         Whether or not to store the user's logged in state in the session,
@@ -315,6 +316,10 @@ CONFIGURATION
         realm consists of a name, which is used to reference the realm, a
         credential and a store.
 
+        You can also specify a realm class to instantiate instead of the
+        default Catalyst::Authentication::Realm class using the 'class'
+        element within the realm config.
+
         Each realm config contains two hashes, one called 'credential' and
         one called 'store', each of which provide configuration details to
         the respective modules. The contents of these hashes is specific to
@@ -327,38 +332,37 @@ CONFIGURATION
         a complete class name. Otherwise it is considered to be a portion of
         the class name. For credentials, the classname 'Password', for
         example, is expanded to
-        Catalyst::Plugin::Authentication::Credential::Password. For stores,
-        the classname 'storename' is expanded to:
-        Catalyst::Plugin::Authentication::Store::storename.
+        Catalyst::Authentication::Credential::Password. For stores, the
+        classname 'storename' is expanded to:
+        Catalyst::Authentication::Store::storename.
 
 METHODS
-    authenticate( $userinfo, $realm )
-        Attempts to authenticate the user using the information in the
-        $userinfo hash reference using the realm $realm. $realm may be
-        omitted, in which case the default realm is checked.
+  authenticate( $userinfo, $realm )
+    Attempts to authenticate the user using the information in the $userinfo
+    hash reference using the realm $realm. $realm may be omitted, in which
+    case the default realm is checked.
 
-    user
-        Returns the currently logged in user or undef if there is none.
+  user( )
+    Returns the currently logged in user or undef if there is none.
 
-    user_exists
-        Returns true if a user is logged in right now. The difference
-        between user_exists and user is that user_exists will return true if
-        a user is logged in, even if it has not been yet retrieved from the
-        storage backend. If you only need to know if the user is logged in,
-        depending on the storage mechanism this can be much more efficient.
+  user_exists( )
+    Returns true if a user is logged in right now. The difference between
+    user_exists and user is that user_exists will return true if a user is
+    logged in, even if it has not been yet retrieved from the storage
+    backend. If you only need to know if the user is logged in, depending on
+    the storage mechanism this can be much more efficient.
 
-    user_in_realm ( $realm )
-        Works like user_exists, except that it only returns true if a user
-        is both logged in right now and was retrieved from the realm
-        provided.
+  user_in_realm( $realm )
+    Works like user_exists, except that it only returns true if a user is
+    both logged in right now and was retrieved from the realm provided.
 
-    logout
-        Logs the user out, Deletes the currently logged in user from
-        $c->user and the session.
+  logout( )
+    Logs the user out, Deletes the currently logged in user from $c->user
+    and the session.
 
-    find_user( $userinfo, $realm )
-        Fetch a particular users details, matching the provided user info,
-        from the realm specified in $realm.
+  find_user( $userinfo, $realm )
+    Fetch a particular users details, matching the provided user info, from
+    the realm specified in $realm.
 
 INTERNAL METHODS
     These methods are for Catalyst::Plugin::Authentication INTERNAL USE
@@ -367,41 +371,42 @@ INTERNAL METHODS
     nasty shock of having to fix / rewrite your code when things change.
     They are documented here only for reference.
 
-    set_authenticated ( $user, $realmname )
-        Marks a user as authenticated. This is called from within the
-        authenticate routine when a credential returns a user. $realmname
-        defaults to 'default'
+  set_authenticated( $user, $realmname )
+    Marks a user as authenticated. This is called from within the
+    authenticate routine when a credential returns a user. $realmname
+    defaults to 'default'
 
-    auth_restore_user ( $user, $realmname )
-        Used to restore a user from the session. In most cases this is
-        called without arguments to restore the user via the session. Can be
-        called with arguments when restoring a user from some other method.
-        Currently not used in this way.
+  auth_restore_user( $user, $realmname )
+    Used to restore a user from the session. In most cases this is called
+    without arguments to restore the user via the session. Can be called
+    with arguments when restoring a user from some other method. Currently
+    not used in this way.
 
-    save_user_in_session ( $user, $realmname )
-        Used to save the user in a session. Saves $user in session, marked
-        as originating in $realmname. Both arguments are required.
+  save_user_in_session( $user, $realmname )
+    Used to save the user in a session. Saves $user in session, marked as
+    originating in $realmname. Both arguments are required.
 
-    auth_realms
-        Returns a hashref containing realmname -> realm instance pairs.
-        Realm instances contain an instantiated store and credential object
-        as the 'store' and 'credential' elements, respectively
+  auth_realms( )
+    Returns a hashref containing realmname -> realm instance pairs. Realm
+    instances contain an instantiated store and credential object as the
+    'store' and 'credential' elements, respectively
 
-    get_auth_realm ( $realmname )
-        Retrieves the realm instance for the realmname provided.
-
-    *
+  get_auth_realm( $realmname )
+    Retrieves the realm instance for the realmname provided.
 
 SEE ALSO
     This list might not be up to date. Below are modules known to work with
     the updated API of 0.10 and are therefore compatible with realms.
 
+  Realms
+    Catalyst::Authentication::Realm
+
   User Storage Backends
-    Catalyst::Plugin::Authentication::Store::Minimal,
-    Catalyst::Plugin::Authentication::Store::DBIx::Class,
+    Catalyst::Authentication::Store::Minimal,
+    Catalyst::Authentication::Store::DBIx::Class,
 
   Credential verification
-    Catalyst::Plugin::Authentication::Credential::Password,
+    Catalyst::Authentication::Credential::Password,
 
   Authorization
     Catalyst::Plugin::Authorization::ACL,
@@ -456,36 +461,40 @@ COMPATIBILITY ROUTINES
     functionality or any of the methods described above. These are for
     reference purposes only.
 
-    login
-        This method is used to initiate authentication and user retrieval.
-        Technically this is part of the old Password credential module and
-        it still resides in the Password class. It is included here for
-        reference only.
+  login( )
+    This method is used to initiate authentication and user retrieval.
+    Technically this is part of the old Password credential module and it
+    still resides in the Password class. It is included here for reference
+    only.
 
-    default_auth_store
-        Return the store whose name is 'default'.
+  default_auth_store( )
+    Return the store whose name is 'default'.
 
-        This is set to "$c->config->{authentication}{store}" if that value
-        exists, or by using a Store plugin:
+    This is set to "$c->config->{authentication}{store}" if that value
+    exists, or by using a Store plugin:
 
-            # load the Minimal authentication store.
-                use Catalyst qw/Authentication Authentication::Store::Minimal/;
+        # load the Minimal authentication store.
+            use Catalyst qw/Authentication Authentication::Store::Minimal/;
 
-        Sets the default store to
-        Catalyst::Plugin::Authentication::Store::Minimal.
+    Sets the default store to
+    Catalyst::Plugin::Authentication::Store::Minimal.
 
-    get_auth_store $name
-        Return the store whose name is $name.
+  get_auth_store( $name )
+    Return the store whose name is $name.
 
-    get_auth_store_name $store
-        Return the name of the store $store.
+  get_auth_store_name( $store )
+    Return the name of the store $store.
 
-    auth_stores
-        A hash keyed by name, with the stores registered in the app.
+  auth_stores( )
+    A hash keyed by name, with the stores registered in the app.
 
-    register_auth_stores %stores_by_name
-        Register stores into the application.
+  register_auth_stores( %stores_by_name )
+    Register stores into the application.
 
+  auth_store_names( )
+  get_user( )
+  setup( )
+  setup_auth_realm( )
 AUTHORS
     Yuval Kogman, "nothingmuch@woobling.org"
 

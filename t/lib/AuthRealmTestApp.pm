@@ -84,7 +84,7 @@ sub moose : Local {
 	$c->res->body( "ok" );
 }
 
-__PACKAGE__->config->{authentication} = {  
+__PACKAGE__->config->{'Plugin::Authentication'} = {  
     default_realm => 'members',
     realms => {
         members => {

@@ -1,7 +1,7 @@
 
 =head1 NAME
 
-Catalyst::Plugin::Authentication::Store - All about authentication stores
+Catalyst::Authentication::Store - All about authentication stores
 
 =head1 MULTIPLE BACKENDS
 
@@ -9,7 +9,7 @@ B<NOTE> This is documentation for the old store system used in versions of
 L<Catalyst::Plugin::Authentication> prior to 0.10.  This is NOT how the 
 new realm-based stores work. This is here for reference only.
 
-See L<Catalyst::Plugin::Authentication::Internals> instead.
+See L<Catalyst::Authentication::Internals> instead.
 
 =head1 OLD STORE DOCUMENTATION BELOW
 
@@ -67,7 +67,7 @@ The only method you really need to support is C<get_user>.
 
 This method should accept an arbitrary list of parameters (determined by you or
 the credential verifyer), and return an object inheriting
-L<Catalyst::Plugin::Authentication::User>.
+L<Catalyst::Authentication::User>.
 
 For introspection purposes you can also define the C<user_supports> method. See
 below for optional features. This is not necessary, but might be in the future.
@@ -106,7 +106,7 @@ Sometimes a store is agnostic to the credentials (DB storage, for example), but
 sometimes it isn't (like an Htpasswd file).
 
 If you are writing a backend that wraps around a module, like
-L<Catalyst::Plugin::Authentication::Store::Htpasswd> wraps around
+L<Catalyst::Authentication::Store::Htpasswd> wraps around
 L<Authen::Htpasswd>, it makes sense to delegate the credential checks.
 
 This particular example caused the following "feature" to be added:
@@ -124,7 +124,7 @@ These plugins should look something like this:
 
         $c->default_auth_store(
             # a store can be an object or a class
-            Catalyst::Plugin::Authentication::Store::Foo::Backend->new(
+            Catalyst::Authentication::Store::Foo::Backend->new(
                 ...
             )
         );

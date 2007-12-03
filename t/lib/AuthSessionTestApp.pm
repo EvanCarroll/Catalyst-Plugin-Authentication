@@ -1,5 +1,5 @@
 package User::SessionRestoring;
-use base qw/Catalyst::Plugin::Authentication::User::Hash/;
+use base qw/Catalyst::Authentication::User::Hash/;
 
 sub for_session { $_[0]->id }
 sub store { $_[0]->{store} }

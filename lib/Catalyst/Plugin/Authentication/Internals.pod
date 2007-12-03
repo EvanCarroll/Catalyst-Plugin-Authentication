@@ -271,14 +271,14 @@ The user object is an important piece of your store module. It will be the
 part of the system that the application developer will interact with most. As
 such, the API for the user object is very rigid. All user objects B<MUST>
 inherit from
-L<Catalyst::Plugin::Authentication::User|Catalyst::Plugin::Authentication::User>.
+L<Catalyst::Authentication::User|Catalyst::Authentication::User>.
 
 =head3 USER METHODS
 
 The routines required by the
 L<Catalyst::Plugin::Authentication|Catalyst::Plugin::Authentication> plugin
 are below. Note that of these, only get_object is strictly required, as the
-L<Catalyst::Plugin::Authentication::User|Catalyst::Plugin::Authentication::User>
+L<Catalyst::Authentication::User|Catalyst::Authentication::User>
 base class contains reasonable implementations of the rest. If you do choose
 to implement only the C<get_object()> routine, please read the base class code
 and documentation so that you fully understand how the other routines will be
@@ -304,7 +304,7 @@ This method checks to see if the user class supports a particular feature.  It
 is implemented such that each argument provides a subfeature of the previous 
 argument. In other words, passing 'foo', 'bar'  would return true if the user
 supported the 'foo' feature, and the 'bar' feature of 'foo'.   This is implemented
-in Catalyst::Plugin::Authentication::User, so if your class inherits from that, you
+in Catalyst::Authentication::User, so if your class inherits from that, you
 do not need to implement this and can instead implement supported_features(). 
 
 B<Note:> If you want the authentication module to be able to save your user in
@@ -402,7 +402,7 @@ credential's documentation - as application authors are almost
 certainly expecting the user to be found using the information provided 
 to $c->authenticate().
 
-Look at the L<Catalyst::Plugin::Authentication::Credential::Password|Catalyst::Plugin::Authentication::Credential::Password>
+Look at the L<Catalyst::Authentication::Credential::Password|Catalyst::Authentication::Credential::Password>
 module source to see this in action.  In order to avoid possible 
 mismatches between the encrypted and unencrypted passwords, the password 
 credential actually removes the provided password from the authinfo 
@@ -418,9 +418,9 @@ removing them before user retrieval.  A better solution is to
 place those arguments that are specific to your credential 
 within their own subhash named after your module.
  
-The L<Catalyst::Plugin::Authentication::Store::DBIx::Class|Catalyst::Plugin::Authentication::Store::DBIx::Class> module does this
+The L<Catalyst::Authentication::Store::DBIx::Class|Catalyst::Authentication::Store::DBIx::Class> module does this
 in order to encapsulate arguments intended specifically for 
-that module. See the L<Catalyst::Plugin::Authentication::Store::DBIx::Class::User|Catalyst::Plugin::Authentication::Store::DBIx::Class::User>
+that module. See the L<Catalyst::Authentication::Store::DBIx::Class::User|Catalyst::Authentication::Store::DBIx::Class::User>
 source for details.
 
 =back

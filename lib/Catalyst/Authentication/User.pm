@@ -1,6 +1,4 @@
-#!/usr/bin/perl
-
-package Catalyst::Plugin::Authentication::User;
+package Catalyst::Authentication::User;
 
 use strict;
 use warnings;
@@ -82,12 +80,12 @@ __END__
 
 =head1 NAME
 
-Catalyst::Plugin::Authentication::User - Base class for user objects.
+Catalyst::Authentication::User - Base class for user objects.
 
 =head1 SYNOPSIS
 
 	package MyStore::User;
-	use base qw/Catalyst::Plugin::Authentication::User/;
+	use base qw/Catalyst::Authentication::User/;
 
 =head1 DESCRIPTION
 
@@ -95,25 +93,22 @@ This is the base class for authenticated
 
 =head1 METHODS
 
-=over 4
-
-=item id
+=head2 id( )
 
 A unique ID by which a user can be retrieved from the store.
 
-=item store
+=head2 store( )
 
 Should return a class name that can be used to refetch the user using it's
 ID.
 
-=item supports
+=head2 supports( )
 
 An introspection method used to determine what features a user object has, to support credential and authorization plugins.
 
-=item 
+=head2 get( )
 
-=back
+=head2 get_object( )
 
 =cut
-
 
