@@ -20,7 +20,7 @@ use Catalyst::Authentication::Realm;
 #	constant->import(have_want => eval { require Want });
 #}
 
-our $VERSION = "0.10003";
+our $VERSION = "0.10004";
 
 sub set_authenticated {
     my ( $c, $user, $realmname ) = @_;

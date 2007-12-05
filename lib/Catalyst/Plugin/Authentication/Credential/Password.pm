@@ -20,6 +20,8 @@ Catalyst::Plugin::Authentication::Credential::Password - Compatibility shim
 THIS IS A COMPATIBILITY SHIM.  It allows old configurations of Catalyst
 Authentication to work without code changes.  
 
+B<DO NOT USE IT IN ANY NEW CODE!>
+
 Please see L<Catalyst::Authentication::Credential::Password> for more information.
 
 
