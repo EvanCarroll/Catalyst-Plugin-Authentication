@@ -79,7 +79,7 @@ sub setup {
 
     $c->default_auth_store(
         __PACKAGE__->new( 
-            $c->config->{authentication}, $c
+            $c->config->{'Plugin::Authentication'}, $c
         )
     );
 
@@ -107,7 +107,7 @@ Catalyst::Authentication::Store::Minimal - Minimal authentication store
         Authentication
     /;
 
-    __PACKAGE__->config->{authentication} = 
+    __PACKAGE__->config->{'Plugin::Authentication'} = 
                     {  
                         default_realm => 'members',
                         realms => {

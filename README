@@ -125,7 +125,7 @@ EXAMPLE
             Authentication
         /;
 
-        __PACKAGE__->config->{authentication} = 
+        __PACKAGE__->config->{'Plugin::Authentication'} = 
                     {  
                         default_realm => 'members',
                         realms => {
@@ -246,7 +246,7 @@ EXAMPLE
     database. You can accomplish this simply by installing the DBIx::Class
     Store and changing your config:
 
-        __PACKAGE__->config->{authentication} = 
+        __PACKAGE__->config->{'Plugin::Authentication'} = 
                         {  
                             default_realm => 'members',
                             realms => {
@@ -270,7 +270,7 @@ EXAMPLE
 
 CONFIGURATION
         # example
-        __PACKAGE__->config->{authentication} = 
+        __PACKAGE__->config->{'Plugin::Authentication'} = 
                     {  
                         default_realm => 'members',
                         realms => {
@@ -470,8 +470,8 @@ COMPATIBILITY ROUTINES
   default_auth_store( )
     Return the store whose name is 'default'.
 
-    This is set to "$c->config->{authentication}{store}" if that value
-    exists, or by using a Store plugin:
+    This is set to "$c->config->{'Plugin::Authentication'}{store}" if that
+    value exists, or by using a Store plugin:
 
         # load the Minimal authentication store.
             use Catalyst qw/Authentication Authentication::Store::Minimal/;

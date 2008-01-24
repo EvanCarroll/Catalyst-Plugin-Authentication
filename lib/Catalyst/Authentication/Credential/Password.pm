@@ -236,7 +236,7 @@ provided against the user retrieved from the store.
 =head1 CONFIGURATION
 
     # example
-    __PACKAGE__->config->{authentication} = 
+    __PACKAGE__->config->{'Plugin::Authentication'} = 
                 {  
                     default_realm => 'members',
                     realms => {

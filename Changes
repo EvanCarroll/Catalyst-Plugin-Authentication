@@ -1,5 +1,12 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+0.10005 2008-01-24
+        - Bugfix release - correcting 'Plugin::Authentication' configuration
+          problem.
+
+0.10004 2007-12-04
+        - Added some code for back-compatibility
+
 0.10003 2007-12-02
         - Added a "Null" store for credentials that don't require real stores.
         - Make realms bonafide objects

@@ -52,7 +52,7 @@ sub moose : Local {
 	$c->res->body( "ok" );
 }
 
-__PACKAGE__->config->{authentication}{users} = $users = {
+__PACKAGE__->config->{'Plugin::Authentication'}{users} = $users = {
 	foo => {
 		password => "s3cr3t",
 	},

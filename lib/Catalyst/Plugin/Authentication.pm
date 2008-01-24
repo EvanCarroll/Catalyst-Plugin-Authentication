@@ -20,7 +20,7 @@ use Catalyst::Authentication::Realm;
 #	constant->import(have_want => eval { require Want });
 #}
 
-our $VERSION = "0.10004";
+our $VERSION = "0.10005";
 
 sub set_authenticated {
     my ( $c, $user, $realmname ) = @_;
@@ -39,7 +39,7 @@ sub set_authenticated {
     }
     
     if (    $c->isa("Catalyst::Plugin::Session")
-        and $c->config->{authentication}{use_session}
+        and $c->config->{'Plugin::Authentication'}{'use_session'}
         and $user->supports("session") )
     {
         $realm->save_user_in_session($c, $user);
@@ -107,7 +107,7 @@ sub logout {
 
     if (
         $c->isa("Catalyst::Plugin::Session")
-        and $c->config->{authentication}{use_session}
+        and $c->config->{'Plugin::Authentication'}{'use_session'}
         and $c->session_is_valid
     ) {
         delete @{ $c->session }{qw/__user __user_realm/};
@@ -135,7 +135,7 @@ sub _user_in_session {
 
     return unless
         $c->isa("Catalyst::Plugin::Session")
-        and $c->config->{authentication}{use_session}
+        and $c->config->{'Plugin::Authentication'}{'use_session'}
         and $c->session_is_valid;
 
     return $c->session->{__user};
@@ -179,9 +179,21 @@ sub _authentication_initialize {
     ## make classdata where it is used.  
     $app->mk_classdata( '_auth_realms' => {});
     
-    my $cfg = $app->config->{'Plugin::Authentication'} ||= $app->config->{'authentication'} ||= {};
+    my $cfg = $app->config->{'Plugin::Authentication'};
+    if (!defined($cfg)) {
+        if (exists($app->config->{'authentication'})) {
+            $cfg = $app->config->{'authentication'};
+            $app->config->{'Plugin::Authentication'} = $app->config->{'authentication'};
+        } else {
+            $cfg = {};
+        }
+    }
 
-    $cfg->{use_session} = 1;
+    # old default was to force use_session on.  This must remain for that
+    # reason - but if use_session is already in the config, we respect it's setting.
+    if (!exists($cfg->{'use_session'})) {
+        $cfg->{'use_session'} = 1;
+    }
     
     if (exists($cfg->{'realms'})) {
         foreach my $realm (keys %{$cfg->{'realms'}}) {
@@ -514,7 +526,7 @@ This means that our application will begin like this:
         Authentication
     /;
 
-    __PACKAGE__->config->{authentication} = 
+    __PACKAGE__->config->{'Plugin::Authentication'} = 
                 {  
                     default_realm => 'members',
                     realms => {
@@ -636,7 +648,7 @@ efficient to maintain a hash of users, so you move this data to a database.
 You can accomplish this simply by installing the DBIx::Class Store and
 changing your config:
 
-    __PACKAGE__->config->{authentication} = 
+    __PACKAGE__->config->{'Plugin::Authentication'} = 
                     {  
                         default_realm => 'members',
                         realms => {
@@ -662,7 +674,7 @@ new source. The rest of your application is completely unchanged.
 =head1 CONFIGURATION
 
     # example
-    __PACKAGE__->config->{authentication} = 
+    __PACKAGE__->config->{'Plugin::Authentication'} = 
                 {  
                     default_realm => 'members',
                     realms => {
@@ -887,7 +899,7 @@ included here for reference only.
 
 Return the store whose name is 'default'.
 
-This is set to C<< $c->config->{authentication}{store} >> if that value exists,
+This is set to C<< $c->config->{'Plugin::Authentication'}{store} >> if that value exists,
 or by using a Store plugin:
 
     # load the Minimal authentication store.
