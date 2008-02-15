@@ -45,12 +45,13 @@ B<Initialization>
 B<Realm Setup> - for each realm:
 
 =over 4
+1) The Realm is instantiated using new() method
 
-1) The Store is instantiated using new() method
+2) The Store is instantiated using new() method
 
-2) The Credential Instantiated using new() method
+3) The Credential Instantiated using new() method
 
-3) Credential and Store objects tied to realm for use during requests
+4) Credential and Store objects tied to realm for use during requests
 
 =back
 
@@ -64,20 +65,19 @@ C<< $c->authenticate( $userinfo, $realm ) >> called
 
 =over 4
 
-1) Credential / Store objects retrieved for realm provided
+1) Credential object retrieved for realm provided
 
-2) Credential's authenticate() method called
+2) Credential's authenticate() method called with authinfo and realm object for current realm
 
 =over 4 
 
-The realm's store object and the authinfo hash provided to the
-credential object's authenticate call. In most cases the
-credential object will attempt to retrieve a user from the store
-provided by using the Store's find_user() method. It will then
-usually compare the retrieved user's information with the
-information provided in the $authinfo hash. This is how the
-default 'Password' credential functions. If the credentials match,
-the authenticate() method should return a user object.
+The realm object and the authinfo hash are provided to the credential object's
+authenticate call. In most cases the credential object will attempt to
+retrieve a user using the realm's find_user() method, which by default relays
+the call directly to the Store's find_user() method. It will then usually
+compare the retrieved user's information with the information provided in the
+$authinfo hash. This is how the default 'Password' credential functions. If
+the credentials match, the authenticate() method should return a user object.
 
 =back
 
@@ -85,13 +85,13 @@ the authenticate() method should return a user object.
 
 =over 4
 
-If the user object supports session storage, the successfully
-authenticated user will be placed in session storage. This is done
-by calling the store object's for_session() method, which should
-return serialized data (IE a scalar). This serialized data is
-passed back to the store via the from_session() method, so the
-data should contain enough information for the store to recreate /
-reload the user.
+If the user object supports session storage, the successfully authenticated
+user will be placed in session storage. This is done by calling the realm
+object's save_user_in_session() method. The save_user_in_session() routine by
+default calls the Store's for_session() method, which should return serialized
+data (IE a scalar). This serialized data is passed back to the store via the
+from_session() method, so the data should contain enough information for the
+store to recreate / reload the user.
 
 =back
 
@@ -192,7 +192,7 @@ that must be implemented. They are:
 
 =over 4
 
-=item new( $config, $app )
+=item new( $config, $app, $realm )
 
 The C<new()> method is called only once, during the setup process of
 L<Catalyst::Plugin::Authentication|Catalyst::Plugin::Authentication>. The
@@ -359,14 +359,15 @@ one class to implement, and it consists of only two required routines. They are:
 
 =over 4
 
-=item new( $config, $app )
+=item new( $config, $app, $realm )
 
 Like the Store method of the same name, the C<new()> method is called only 
 once, during the setup process of 
 L<Catalyst::Plugin::Authentication|Catalyst::Plugin::Authentication>. The
 first argument, C<$config>, is a hash reference containing the configuration
 information for the credential module. The second argument is a reference 
-to the Catalyst application.
+to the Catalyst application.  $realm is the instantiated Realm object, which
+you may use to access realm routines - such as find_user.
 
 Again, when the credential's new() method is called, Catalyst 
 has not yet loaded the various controller and model classes. 
@@ -374,13 +375,13 @@ has not yet loaded the various controller and model classes.
 The new method should perform any necessary setup required and instantiate 
 your credential object.  It should return your instantiated credential.
 
-=item authenticate( $c, $authstore, $authinfo )
+=item authenticate( $c, $realm, $authinfo )
 
 This is the workhorse of your credential.  When $c->authenticate() is called
 the L<Catalyst::Plugin::Authentication|Catalyst::Plugin::Authentication> module retrieves the
-store object from the realm and passes it, along with the $authinfo hash
+realm object and passes it, along with the $authinfo hash
 to your credential's authenticate method.  Your module should use the 
-$authinfo hash to obtain the user from the store passed, and then perform 
+$authinfo hash to obtain the user from the realm passed, and then perform 
 any credential verification steps necessary to authenticate the user.  This
 method should return the user object returned by the authentication store if
 credential verification succeeded.  It should return undef on failure.  
@@ -394,7 +395,7 @@ It is perfectly acceptable for your credential to perform other tasks prior to
 attempting to retrieve the user from the store. It may also make sense for
 your credential to perform activities which help to locate the user in
 question, for example, finding a user id based on an encrypted token.
-In these scenarios, the $authinfo hash passed to the store's find_user()
+In these scenarios, the $authinfo hash passed to find_user()
 can be different than that which is passed in to $c->authenticate(). Once
 again this is perfectly acceptable if it makes sense for your credential,
 though you are strongly advised to note this behavior clearly in your 

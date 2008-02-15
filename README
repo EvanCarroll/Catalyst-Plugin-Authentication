@@ -364,6 +364,14 @@ METHODS
     Fetch a particular users details, matching the provided user info, from
     the realm specified in $realm.
 
+  update_user_in_session()
+    Under normal circumstances the user data is only saved to the session
+    during initial authentication. This call causes the auth system to
+    re-save the currently authenticated users data in the session. Useful if
+    you have changed the user data and want to ensure that future requests
+    reflect the most current data. Assumes that at the time of this call,
+    $c->user contains the most current data.
+
 INTERNAL METHODS
     These methods are for Catalyst::Plugin::Authentication INTERNAL USE
     only. Please do not use them in your own code, whether application or
@@ -381,10 +389,6 @@ INTERNAL METHODS
     without arguments to restore the user via the session. Can be called
     with arguments when restoring a user from some other method. Currently
     not used in this way.
-
-  save_user_in_session( $user, $realmname )
-    Used to save the user in a session. Saves $user in session, marked as
-    originating in $realmname. Both arguments are required.
 
   auth_realms( )
     Returns a hashref containing realmname -> realm instance pairs. Realm

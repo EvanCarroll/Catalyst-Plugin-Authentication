@@ -172,8 +172,11 @@ Catalyst::Authentication::Realm - Base class for realm objects.
 
 =item class
 
-By default this class is the default realm class. You can specify a custom
-realm class with this config parameter.
+By default this class is used by
+L<Catalyst::Plugin::Authentication|Catalyst::Plugin::Authentication> for all
+realms. The class parameter allows you to choose a different class to use for
+this realm. Creating a new Realm class can allow for authentication methods
+that fall outside the normal credential/store methodology.
 
 =item auto_create_user
 
@@ -189,34 +192,42 @@ authentication (most useful for remote authentication schemes).
 
 =head1 METHODS
 
-=head2 new( )
+=head2 new( $realmname, $config, $app )
 
 Instantiantes this realm, plus the specified store and credential classes.
 
 =head2 store( )
 
-Holds an instance of the store object for this realm.
+Returns an instance of the store object for this realm.
 
 =head2 credential( )
 
-Holds an instance of the credential object for this realm.
+Returns an instance of the credential object for this realm.
 
-=head2 find_user( )
+=head2 find_user( $authinfo, $c )
 
-Delegates to the store object. Will also re-delegate auto_create_user and
-auto_update_user at this time, if necessary.
+Retrieves the user given the authentication information provided.  This 
+is most often called from the credential.  The default realm class simply
+delegates this call the store object.  If enabled, auto-creation and 
+auto-updating of users is also handled here.
 
-=head2 authenticate( )
+=head2 authenticate( $c, $authinfo)
 
-Delegates to the credential objects and sets the authenticated user on success.
+Performs the authentication process for the current realm.  The default 
+realm class simply delegates this to the credential and sets 
+the authenticated user on success.  Returns the authenticated user object;
 
-=head2 save_user_in_session( )
+=head save_user_in_session($c, $user)
 
-Delegates to the store object.
+Used to save the user in a session. Saves $user in the current session, 
+marked as originating in the current realm.  Calls $store->for_session() by 
+default.  If for_session is not available in the store class, will attempt
+to call $user->for_session().
 
-=head2 from_session( )
+=head2 from_session($c, $frozenuser )
 
-Delegates to the store object.
+Triggers restoring of the user from data in the session. The default realm
+class simply delegates the call to $store->from_session($c, $frozenuser);
 
 =cut
 

@@ -359,7 +359,7 @@ There are no publicly exported routines in the Password module (or indeed in
 most credential modules.)  However, below is a description of the routines 
 required by L<Catalyst::Plugin::Authentication> for all credential modules.
 
-=head2 new( $config, $app )
+=head2 new( $config, $app, $realm )
 
 Instantiate a new Password object using the configuration hash provided in
 $config. A reference to the application is provided as the second argument.

@@ -20,7 +20,7 @@ use Catalyst::Authentication::Realm;
 #	constant->import(have_want => eval { require Want });
 #}
 
-our $VERSION = "0.10005";
+our $VERSION = "0.10006";
 
 sub set_authenticated {
     my ( $c, $user, $realmname ) = @_;
@@ -97,6 +97,15 @@ sub __old_save_user_in_session {
         $c->session->{__user} = $realm->{'store'}->for_session($c, $user);
     } else {
         $c->session->{__user} = $user->for_session;
+    }
+}
+
+sub update_user_in_session {
+    my $c = shift;
+
+    if ($c->user_exists) {
+        my $realm = $c->get_auth_realm($c->_user->auth_realm);
+        $realm->save_user_in_session($c, $c->user);
     }
 }
 
@@ -778,6 +787,15 @@ Logs the user out, Deletes the currently logged in user from $c->user and the se
 Fetch a particular users details, matching the provided user info, from the realm 
 specified in $realm.
 
+=head2 update_user_in_session()
+
+Under normal circumstances the user data is only saved to the session during
+initial authentication.  This call causes the auth system to re-save the 
+currently authenticated users data in the session.  Useful if you have
+changed the user data and want to ensure that future requests reflect the
+most current data.  Assumes that at the time of this call, $c->user 
+contains the most current data.
+
 =head1 INTERNAL METHODS
 
 These methods are for Catalyst::Plugin::Authentication B<INTERNAL USE> only.
@@ -796,11 +814,6 @@ routine when a credential returns a user. $realmname defaults to 'default'
 Used to restore a user from the session. In most cases this is called without
 arguments to restore the user via the session. Can be called with arguments
 when restoring a user from some other method.  Currently not used in this way.
-
-=head2 save_user_in_session( $user, $realmname )
-
-Used to save the user in a session. Saves $user in session, marked as
-originating in $realmname. Both arguments are required.
 
 =head2 auth_realms( )
 

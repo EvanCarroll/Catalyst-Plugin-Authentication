@@ -1,5 +1,10 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+0.10006 2008-02-15
+        - Additional documentation for Realms
+        - Added update_user_in_session routine to allow re-saving of user data
+          into the session.
+
 0.10005 2008-01-24
         - Bugfix release - correcting 'Plugin::Authentication' configuration
           problem.
