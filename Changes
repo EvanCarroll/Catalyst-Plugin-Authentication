@@ -1,5 +1,18 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+0.10007_01 2008-06-11
+        - Some documentation fixes (including RT #36062)
+        - Compatibility fix where the use of new style config and old
+          style Authentication::Store::Minimal would cause a crash 
+          (Reported & fixed by Jos Boumans C<kane@cpan.org>)
+ 
+0.10007 2008-03-17
+        - Documentation update on Password - to indicate proper field naming
+        - Decouple Authentication system from session.  The realm class
+          now allows complete control over how a user is persisted across
+          requests.
+        - pod fixes (RT #36062, RT #36063)
+
 0.10006 2008-02-15
         - Additional documentation for Realms
         - Added update_user_in_session routine to allow re-saving of user data

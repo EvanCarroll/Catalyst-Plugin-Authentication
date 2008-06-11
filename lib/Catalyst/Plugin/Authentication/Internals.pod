@@ -45,6 +45,7 @@ B<Initialization>
 B<Realm Setup> - for each realm:
 
 =over 4
+
 1) The Realm is instantiated using new() method
 
 2) The Store is instantiated using new() method
@@ -438,4 +439,3 @@ it and/or modify it under the same terms as Perl itself.
 
 =cut
 
- 

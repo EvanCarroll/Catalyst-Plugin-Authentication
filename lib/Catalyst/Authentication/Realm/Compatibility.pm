@@ -14,6 +14,7 @@ sub new {
     my $self = { config => $config };
     bless $self, $class;
     
+    $self->config->{'use_session'} = $app->config->{'Plugin::Authentication'}{'use_session'} || '1';
     $self->name($realmname);
     
     return $self;

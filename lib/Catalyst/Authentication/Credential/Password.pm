@@ -275,7 +275,9 @@ The field in the user object that contains the password. This will vary
 depending on the storage class used, but is most likely something like
 'password'. In fact, this is so common that if this is left out of the config,
 it defaults to 'password'. This field is obtained from the user object using
-the get() method. Essentially: $user->get('passwordfieldname');
+the get() method. Essentially: $user->get('passwordfieldname'); 
+B<NOTE> If the password_field is something other than 'password', you must 
+be sure to use that same field name when calling $c->authenticate(). 
 
 =item password_type 
 

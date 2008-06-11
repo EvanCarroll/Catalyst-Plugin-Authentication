@@ -13,14 +13,8 @@ use Tie::RefHash;
 use Class::Inspector;
 use Catalyst::Authentication::Realm;
 
-# this optimization breaks under Template::Toolkit
-# use user_exists instead
-#BEGIN {
-#	require constant;
-#	constant->import(have_want => eval { require Want });
-#}
 
-our $VERSION = "0.10006";
+our $VERSION = "0.10007_01";
 
 sub set_authenticated {
     my ( $c, $user, $realmname ) = @_;
@@ -37,14 +31,9 @@ sub set_authenticated {
         Catalyst::Exception->throw(
                 "set_authenticated called with nonexistant realm: '$realmname'.");
     }
-    
-    if (    $c->isa("Catalyst::Plugin::Session")
-        and $c->config->{'Plugin::Authentication'}{'use_session'}
-        and $user->supports("session") )
-    {
-        $realm->save_user_in_session($c, $user);
-    }
     $user->auth_realm($realm->name);
+
+    $c->persist_user();    
     
     $c->NEXT::set_authenticated($user, $realmname);
 }
@@ -64,10 +53,10 @@ sub user {
 }
 
 # change this to allow specification of a realm - to verify the user is part of that realm
-# in addition to verifying that they exist. 
+# in addition to verifying that they exist.
 sub user_exists {
 	my $c = shift;
-	return defined($c->_user) || defined($c->_user_in_session);
+	return defined($c->_user) || defined($c->_find_realm_for_persisted_user);
 }
 
 # works like user_exists - except only returns true if user 
@@ -77,10 +66,13 @@ sub user_in_realm {
 
     if (defined($c->_user)) {
         return ($c->_user->auth_realm eq $realmname);
-    } elsif (defined($c->_user_in_session)) {
-        return ($c->session->{__user_realm} eq $realmname);  
     } else {
-        return undef;
+        my $realm = $c->_find_realm_for_persisted_user;
+        if ($realm) {
+            return ($realm->name eq $realmname);
+        } else {
+            return undef;
+        }
     }
 }
 
@@ -100,13 +92,35 @@ sub __old_save_user_in_session {
     }
 }
 
-sub update_user_in_session {
+sub persist_user {
     my $c = shift;
 
     if ($c->user_exists) {
+        
+        ## if we have a valid session handler - we store the 
+        ## realm in the session.  If not - we have to hope that 
+        ## the realm can recognize it's frozen user somehow.
+        if ($c->isa("Catalyst::Plugin::Session") && 
+            $c->config->{'Plugin::Authentication'}{'use_session'} && 
+            $c->session_is_valid) {
+        
+            $c->session->{'__user_realm'} = $c->_user->auth_realm; 
+        }
+        
         my $realm = $c->get_auth_realm($c->_user->auth_realm);
-        $realm->save_user_in_session($c, $c->user);
+        
+        # used to call $realm->save_user_in_session
+        $realm->persist_user($c, $c->user);
     }
+}
+
+
+## this was a short lived method to update user information - 
+## you should use persist_user instead.
+sub update_user_in_session {
+    my $c = shift;
+
+    return $c->persist_user;
 }
 
 sub logout {
@@ -114,12 +128,9 @@ sub logout {
 
     $c->user(undef);
 
-    if (
-        $c->isa("Catalyst::Plugin::Session")
-        and $c->config->{'Plugin::Authentication'}{'use_session'}
-        and $c->session_is_valid
-    ) {
-        delete @{ $c->session }{qw/__user __user_realm/};
+    my $realm = $c->_find_realm_for_persisted_user;
+    if ($realm) {
+        $realm->remove_persisted_user($c);
     }
     
     $c->NEXT::logout(@_);
@@ -139,31 +150,46 @@ sub find_user {
 }
 
 
-sub _user_in_session {
+sub _find_realm_for_persisted_user {
     my $c = shift;
-
-    return unless
-        $c->isa("Catalyst::Plugin::Session")
+    
+    my $realm;
+    if ($c->isa("Catalyst::Plugin::Session")
         and $c->config->{'Plugin::Authentication'}{'use_session'}
-        and $c->session_is_valid;
-
-    return $c->session->{__user};
+        and $c->session_is_valid 
+        and exists($c->session->{'__user_realm'})) {
+    
+        $realm = $c->auth_realms->{$c->session->{'__user_realm'}};
+        if ($realm->user_is_restorable($c)) {
+            return $realm; 
+        }
+    } else {
+        ## we have no choice but to ask each realm whether it has a persisted user.
+        foreach my $realmname (@{$c->_auth_realm_restore_order}) {
+            my $ret = $c->auth_realms->{$realmname}->user_is_restorable($c);
+            if ($ret) {
+                return $c->auth_realms->{$realmname};
+            }
+        }
+    }
+    return undef;
 }
 
 sub auth_restore_user {
     my ( $c, $frozen_user, $realmname ) = @_;
 
-    $frozen_user ||= $c->_user_in_session;
-    return unless defined($frozen_user);
+    my $realm;
+    if (defined($realmname)) {
+        $realm = $c->get_auth_realm($realmname); 
+    } else {
+        $realm = $c->_find_realm_for_persisted_user;
+    }
+    return unless $realm; # FIXME die unless? This is an internal inconsistency
 
-    $realmname  ||= $c->session->{__user_realm};
-    return unless $realmname; # FIXME die unless? This is an internal inconsistency
-
-    my $realm = $c->get_auth_realm($realmname);
-    $c->_user( my $user = $realm->from_session( $c, $frozen_user ) );
+    $c->_user( my $user = $realm->restore_user( $c, $frozen_user ) );
     
     # this sets the realm the user originated in.
-    $user->auth_realm($realmname);
+    $user->auth_realm($realm->name);
         
     return $user;
 
@@ -188,6 +214,19 @@ sub _authentication_initialize {
     ## make classdata where it is used.  
     $app->mk_classdata( '_auth_realms' => {});
     
+    ## the order to attempt restore in - If we don't have session - we have 
+    ## no way to be sure where a frozen user came from - so we have to 
+    ## ask each realm if it can restore the user.  Unfortunately it is possible 
+    ## that multiple realms could restore the user from the data we have - 
+    ## So we have to determine at setup time what order to ask the realms in.  
+    ## The default is to use the user_restore_priority values defined in the realm
+    ## config. if they are not defined - we go by alphabetical order.   Note that 
+    ## the 'default' realm always gets first chance at it unless it is explicitly
+    ## placed elsewhere by user_restore_priority.  Remember this only comes
+    ## into play if session is disabled. 
+    
+    $app->mk_classdata( '_auth_realm_restore_order' => []);
+    
     my $cfg = $app->config->{'Plugin::Authentication'};
     if (!defined($cfg)) {
         if (exists($app->config->{'authentication'})) {
@@ -205,14 +244,39 @@ sub _authentication_initialize {
     }
     
     if (exists($cfg->{'realms'})) {
-        foreach my $realm (keys %{$cfg->{'realms'}}) {
+        
+        my %auth_restore_order;
+        my $authcount = 2;
+        my $defaultrealm = 'default';
+        
+        foreach my $realm (sort keys %{$cfg->{'realms'}}) {
+            
             $app->setup_auth_realm($realm, $cfg->{'realms'}{$realm});
+            
+            if (exists($cfg->{'realms'}{$realm}{'user_restore_priority'})) {
+                $auth_restore_order{$realm} = $cfg->{'realms'}{$realm}{'user_restore_priority'};
+            } else {
+                $auth_restore_order{$realm} = $authcount++;
+            }
         }
-        #  if we have a 'default_realm' in the config hash and we don't already 
+        
+        # if we have a 'default_realm' in the config hash and we don't already 
         # have a realm called 'default', we point default at the realm specified
         if (exists($cfg->{'default_realm'}) && !$app->get_auth_realm('default')) {
-            $app->_set_default_auth_realm($cfg->{'default_realm'});
+            if ($app->_set_default_auth_realm($cfg->{'default_realm'})) {
+                $defaultrealm = $cfg->{'default_realm'};
+                $auth_restore_order{'default'} = $auth_restore_order{$cfg->{'default_realm'}};
+                delete($auth_restore_order{$cfg->{'default_realm'}});
+            }
         }
+        
+        ## if the default realm did not have a defined priority in it's config - we put it at the front.
+        if (!exists($cfg->{'realms'}{$defaultrealm}{'user_restore_priority'})) {
+            $auth_restore_order{'default'} = 1;
+        }
+        
+        @{$app->_auth_realm_restore_order} = sort { $auth_restore_order{$a} <=> $auth_restore_order{$b} } keys %auth_restore_order;
+        
     } else {
         
         ## BACKWARDS COMPATIBILITY - if realms is not defined - then we are probably dealing
@@ -225,13 +289,15 @@ sub _authentication_initialize {
             $cfg->{'stores'}{'default'} = $cfg->{'store'};
         }
 
+        push @{$app->_auth_realm_restore_order}, 'default';
         foreach my $storename (keys %{$cfg->{'stores'}}) {
             my $realmcfg = {
                 store => { class => $cfg->{'stores'}{$storename} },
             };
+            print STDERR "Foo, ok?\n";
             $app->setup_auth_realm($storename, $realmcfg);
         }
-    }
+    } 
     
 }
 
@@ -267,7 +333,9 @@ sub auth_realms {
 
 sub get_auth_realm {
     my ($app, $realmname) = @_;
+    
     return $app->auth_realms->{$realmname};
+    
 }
 
 
@@ -490,13 +558,18 @@ realms is available in the configuration section.
 
 =head3 Credential Verifiers
 
-When user input is transferred to the L<Catalyst> application (typically via
-form inputs) the application may pass this information into the authentication
-system through the $c->authenticate() method.  From there, it is passed to the
-appropriate Credential verifier.
+When user input is transferred to the L<Catalyst> application
+(typically via form inputs) the application may pass this information
+into the authentication system through the C<<$c->authenticate()>>
+method.  From there, it is passed to the appropriate Credential
+verifier.
 
 These plugins check the data, and ensure that it really proves the user is who
 they claim to be.
+
+Credential verifiers compatible with versions of this module 0.10x and
+upwards should be in the namespace
+C<Catalyst::Authentication::Credential>.
 
 =head3 Storage Backends
 
@@ -508,6 +581,10 @@ When a user is retrieved from a store it is not necessarily authenticated.
 Credential verifiers accept a set of authentication data and use this
 information to retrieve the user from the store they are paired with.
 
+storage backends compatible with versions of this module 0.10x and
+upwards should be in the namespace
+C<Catalyst::Authentication::Store>.
+
 =head3 The Core Plugin
 
 This plugin on its own is the glue, providing realm configuration, session
@@ -517,7 +594,7 @@ integration, and other goodness for the other plugins.
 
 More layers of plugins can be stacked on top of the authentication code. For
 example, L<Catalyst::Plugin::Session::PerUser> provides an abstraction of
-browser sessions that is more persistent per users.
+browser sessions that is more persistent per user.
 L<Catalyst::Plugin::Authorization::Roles> provides an accepted way to separate
 and group users into categories, and then check which categories the current
 user belongs to.
@@ -547,7 +624,7 @@ This means that our application will begin like this:
                             },
                             store => {
                                 class => 'Minimal',
-            	                users = {
+            	                users => {
             	                    bob => {
             	                        password => "s00p3r",                	                    
             	                        editor => 'yes',
@@ -575,8 +652,8 @@ To show an example of this, let's create an authentication controller:
     sub login : Local {
         my ( $self, $c ) = @_;
 
-        if (    my $user = $c->req->param("user")
-            and my $password = $c->req->param("password") )
+        if (    my $user     = $c->req->params->{user}
+            and my $password = $c->req->params->{password"} )
         {
             if ( $c->authenticate( { username => $user, 
                                      password => $password } ) ) {
@@ -590,23 +667,23 @@ To show an example of this, let's create an authentication controller:
         }
     }
 
-This code should be very readable. If all the necessary fields are supplied,
-call the "authenticate" method from the controller. If it succeeds the 
+This code should be self-explanatory. If all the necessary fields are supplied,
+call the C<authenticate> method on the context object. If it succeeds the 
 user is logged in.
 
-The credential verifier will attempt to retrieve the user whose details match
-the authentication information provided to $c->authenticate(). Once it fetches
-the user the password is checked and if it matches the user will be
-B<authenticated> and C<< $c->user >> will contain the user object retrieved
-from the store.
+The credential verifier will attempt to retrieve the user whose
+details match the authentication information provided to
+C<<$c->authenticate()>>. Once it fetches the user the password is
+checked and if it matches the user will be B<authenticated> and
+C<<$c->user>> will contain the user object retrieved from the store.
 
 In the above case, the default realm is checked, but we could just as easily
 check an alternate realm. If this were an admin login, for example, we could
-authenticate on the admin realm by simply changing the $c->authenticate()
+authenticate on the admin realm by simply changing the C<<$c->authenticate()>>
 call:
 
     if ( $c->authenticate( { username => $user, 
-                             password => $password }, 'admin' )l ) {
+                             password => $password }, 'admin' ) ) {
         $c->res->body( "hello " . $c->user->get("name") );
     } ...
 
@@ -626,10 +703,11 @@ The restricted action might look like this:
         # do something restricted here
     }
 
-(Note that if you have multiple realms, you can use $c->user_in_realm('realmname')
-in place of $c->user_exists(); This will essentially perform the same 
-verification as user_exists, with the added requirement that if there is a 
-user, it must have come from the realm specified.)
+(Note that if you have multiple realms, you can use
+C<<$c->user_in_realm('realmname')>>) in place of
+C<<$c->user_exists();>> This will essentially perform the same
+verification as user_exists, with the added requirement that if there
+is a user, it must have come from the realm specified.)
 
 The above example is somewhat similar to role based access control.  
 L<Catalyst::Authentication::Store::Minimal> treats the roles field as
@@ -644,7 +722,7 @@ plugin:
     sub edit : Local {
         my ( $self, $c ) = @_;
 
-        $c->detach("unauthorized") unless $c->check_roles("edit");
+        $c->detach("unauthorized") unless $c->check_user_roles("edit");
 
         # do something restricted here
     }
@@ -654,7 +732,7 @@ role interface is consistent.
 
 Let's say your app grew, and you now have 10000 users. It's no longer
 efficient to maintain a hash of users, so you move this data to a database.
-You can accomplish this simply by installing the DBIx::Class Store and
+You can accomplish this simply by installing the L<DBIx::Class|Catalyst::Authentication::Store::DBIx::Class> Store and
 changing your config:
 
     __PACKAGE__->config->{'Plugin::Authentication'} = 
@@ -755,17 +833,17 @@ Catalyst::Authentication::Store::B<storename>.
 
 =head1 METHODS
 
-=head2 authenticate( $userinfo, $realm )
+=head2 $c->authenticate( $userinfo, [ $realm ])
 
 Attempts to authenticate the user using the information in the $userinfo hash
 reference using the realm $realm. $realm may be omitted, in which case the
 default realm is checked.
 
-=head2 user( )
+=head2 $c->user( )
 
 Returns the currently logged in user or undef if there is none.
 
-=head2 user_exists( )
+=head2 $c->user_exists( )
 
 Returns true if a user is logged in right now. The difference between
 user_exists and user is that user_exists will return true if a user is logged
@@ -773,25 +851,25 @@ in, even if it has not been yet retrieved from the storage backend. If you only
 need to know if the user is logged in, depending on the storage mechanism this
 can be much more efficient.
 
-=head2 user_in_realm( $realm )
+=head2 $c->user_in_realm( $realm )
 
 Works like user_exists, except that it only returns true if a user is both 
 logged in right now and was retrieved from the realm provided.  
 
-=head2 logout( )
+=head2 $c->logout( )
 
-Logs the user out, Deletes the currently logged in user from $c->user and the session.
+Logs the user out, Deletes the currently logged in user from C<<$c->user>> and the session.
 
-=head2 find_user( $userinfo, $realm )
+=head2 $c->find_user( $userinfo, $realm )
 
 Fetch a particular users details, matching the provided user info, from the realm 
 specified in $realm.
 
-=head2 update_user_in_session()
+=head2 persist_user()
 
 Under normal circumstances the user data is only saved to the session during
-initial authentication.  This call causes the auth system to re-save the 
-currently authenticated users data in the session.  Useful if you have
+initial authentication.  This call causes the auth system to save the 
+currently authenticated users data across requests.  Useful if you have
 changed the user data and want to ensure that future requests reflect the
 most current data.  Assumes that at the time of this call, $c->user 
 contains the most current data.
@@ -804,26 +882,30 @@ store modules. If you do, you will very likely get the nasty shock of having
 to fix / rewrite your code when things change. They are documented here only
 for reference.
 
-=head2 set_authenticated( $user, $realmname )
+=head2 $c->set_authenticated( $user, $realmname )
 
 Marks a user as authenticated. This is called from within the authenticate
 routine when a credential returns a user. $realmname defaults to 'default'
 
-=head2 auth_restore_user( $user, $realmname )
+=head2 $c->auth_restore_user( $user, $realmname )
 
 Used to restore a user from the session. In most cases this is called without
 arguments to restore the user via the session. Can be called with arguments
 when restoring a user from some other method.  Currently not used in this way.
 
-=head2 auth_realms( )
+=head2 $c->auth_realms( )
 
 Returns a hashref containing realmname -> realm instance pairs. Realm
 instances contain an instantiated store and credential object as the 'store'
 and 'credential' elements, respectively
 
-=head2 get_auth_realm( $realmname )
+=head2 $c->get_auth_realm( $realmname )
 
 Retrieves the realm instance for the realmname provided.
+
+=head2 $c->update_user_in_session
+
+This was a short lived method to update user information - you should use persist_user instead.
 
 =head1 SEE ALSO
 
@@ -901,14 +983,14 @@ These routines should not be used in any application using realms
 functionality or any of the methods described above. These are for reference
 purposes only.
 
-=head2 login( )
+=head2 $c->login( )
 
 This method is used to initiate authentication and user retrieval. Technically
 this is part of the old Password credential module and it still resides in the
 L<Password|Catalyst::Plugin::Authentication::Credential::Password> class. It is
 included here for reference only.
 
-=head2 default_auth_store( )
+=head2 $c->default_auth_store( )
 
 Return the store whose name is 'default'.
 
@@ -921,29 +1003,29 @@ or by using a Store plugin:
 Sets the default store to
 L<Catalyst::Plugin::Authentication::Store::Minimal>.
 
-=head2 get_auth_store( $name )
+=head2 $c->get_auth_store( $name )
 
 Return the store whose name is $name.
 
-=head2 get_auth_store_name( $store )
+=head2 $c->get_auth_store_name( $store )
 
 Return the name of the store $store.
 
-=head2 auth_stores( )
+=head2 $c->auth_stores( )
 
 A hash keyed by name, with the stores registered in the app.
 
-=head2 register_auth_stores( %stores_by_name )
+=head2 $c->register_auth_stores( %stores_by_name )
 
 Register stores into the application.
 
-=head2 auth_store_names( )
+=head2 $c->auth_store_names( )
 
-=head2 get_user( )
+=head2 $c->get_user( )
 
-=head2 setup( )
+=head2 $c->setup( )
 
-=head2 setup_auth_realm( )
+=head2 $c->setup_auth_realm( )
 
 =head1 AUTHORS
 

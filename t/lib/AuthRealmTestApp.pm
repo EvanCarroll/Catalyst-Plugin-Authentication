@@ -2,7 +2,10 @@ package AuthRealmTestApp;
 use warnings;
 use strict;
 
-use Catalyst qw/Authentication/;
+use Catalyst qw/
+    Authentication
+    Authentication::Store::Minimal
+/;
 
 use Test::More;
 use Test::Exception;

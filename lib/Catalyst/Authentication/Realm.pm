@@ -9,6 +9,8 @@ BEGIN {
     __PACKAGE__->mk_accessors(qw/store credential name config/);
 };
 
+## Add use_session config item to realm.
+
 sub new {
     my ($class, $realmname, $config, $app) = @_;
 
@@ -17,6 +19,14 @@ sub new {
     
     $self->name($realmname);
     
+    if (!exists($self->config->{'use_session'})) {
+        if (exists($app->config->{'Plugin::Authentication'}{'use_session'})) {
+            $self->config->{'use_session'} = $app->config->{'Plugin::Authentication'}{'use_session'};
+        } else {
+            $self->config->{'use_session'} = 1;
+        }
+    }
+    print STDERR "use session is " . $self->config->{'use_session'} . "\n";
     $app->log->debug("Setting up auth realm $realmname") if $app->debug;
 
     # use the Null store as a default
@@ -54,14 +64,22 @@ sub new {
     ###  we must eval the ensure_class_loaded - because we might need to try the old-style
     ###  ::Plugin:: module naming if the standard method fails. 
     
+    ## Note to self - catch second exception and bitch in detail?
+    
     eval {
         Catalyst::Utils::ensure_class_loaded( $credentialclass );
     };
     
     if ($@) {
         $app->log->warn( qq(Credential class "$credentialclass" not found, trying deprecated ::Plugin:: style naming. ) );
+        my $origcredentialclass = $credentialclass;
         $credentialclass =~ s/Catalyst::Authentication/Catalyst::Plugin::Authentication/;
-        Catalyst::Utils::ensure_class_loaded( $credentialclass );
+
+        eval { Catalyst::Utils::ensure_class_loaded( $credentialclass ); };
+        if ($@) {
+            Carp::croak "Unable to load credential class, " . $origcredentialclass . " OR " . $credentialclass . 
+                        " in realm " . $self->name;
+        }
     }
     
     eval {
@@ -70,8 +88,13 @@ sub new {
     
     if ($@) {
         $app->log->warn( qq(Store class "$storeclass" not found, trying deprecated ::Plugin:: style naming. ) );
+        my $origstoreclass = $storeclass;
         $storeclass =~ s/Catalyst::Authentication/Catalyst::Plugin::Authentication/;
-        Catalyst::Utils::ensure_class_loaded( $storeclass );
+        eval { Catalyst::Utils::ensure_class_loaded( $storeclass ); };
+        if ($@) {
+            Carp::croak "Unable to load store class, " . $origstoreclass . " OR " . $storeclass . 
+                        " in realm " . $self->name;
+        }
     }
     
     # BACKWARDS COMPATIBILITY - if the store class does not define find_user, we define it in terms 
@@ -132,19 +155,71 @@ sub authenticate {
      }
 }
 
+sub user_is_restorable {
+    my ($self, $c) = @_;
+    
+    return unless
+         $c->isa("Catalyst::Plugin::Session")
+         and $self->config->{'use_session'}
+         and $c->session_is_valid;
+
+    return $c->session->{__user};
+}
+
+sub restore_user {
+    my ($self, $c, $frozen_user) = @_;
+    
+    $frozen_user ||= $self->user_is_restorable($c);
+    return unless defined($frozen_user);
+
+    $c->_user( my $user = $self->from_session( $c, $frozen_user ) );
+    
+    # this sets the realm the user originated in.
+    $user->auth_realm($self->name);
+    
+    return $user;
+}
+
+sub persist_user {
+    my ($self, $c, $user) = @_;
+    
+    if (
+        $c->isa("Catalyst::Plugin::Session")
+        and $self->config->{'use_session'}
+        and $user->supports("session") 
+    ) {
+        $c->session->{__user_realm} = $self->name;
+    
+        # we want to ask the store for a user prepared for the session.
+        # but older modules split this functionality between the user and the
+        # store.  We try the store first.  If not, we use the old method.
+        if ($self->store->can('for_session')) {
+            $c->session->{__user} = $self->store->for_session($c, $user);
+        } else {
+            $c->session->{__user} = $user->for_session;
+        }
+    }
+    return $user;
+}
+
+sub remove_persisted_user {
+    my ($self, $c) = @_;
+    
+    if (
+        $c->isa("Catalyst::Plugin::Session")
+        and $self->config->{'use_session'}
+        and $c->session_is_valid
+    ) {
+        delete @{ $c->session }{qw/__user __user_realm/};
+    }    
+}
+
+## backwards compatibility - I don't think many people wrote realms since they
+## have only existed for a short time - but just in case.
 sub save_user_in_session {
     my ( $self, $c, $user ) = @_;
 
-    $c->session->{__user_realm} = $self->name;
-    
-    # we want to ask the store for a user prepared for the session.
-    # but older modules split this functionality between the user and the
-    # store.  We try the store first.  If not, we use the old method.
-    if ($self->store->can('for_session')) {
-        $c->session->{__user} = $self->store->for_session($c, $user);
-    } else {
-        $c->session->{__user} = $user->for_session;
-    }
+    return $self->persist_user($c, $user);
 }
 
 sub from_session {
@@ -217,12 +292,28 @@ Performs the authentication process for the current realm.  The default
 realm class simply delegates this to the credential and sets 
 the authenticated user on success.  Returns the authenticated user object;
 
-=head save_user_in_session($c, $user)
+=head2 save_user_in_session($c, $user)
 
 Used to save the user in a session. Saves $user in the current session, 
 marked as originating in the current realm.  Calls $store->for_session() by 
 default.  If for_session is not available in the store class, will attempt
 to call $user->for_session().
+
+=head2 persist_user($c, $user)
+
+Takes the user data and persists it in the sessi.on
+
+=head2 remove_persisted_user($c)
+
+Removes any persisted user data in the session.
+
+=head2 restore_user($c, [$frozen_user])
+
+Restores the user from parameter, or the session by default.
+
+=head2 user_is_restorable( $c )
+
+Predicate to tell you if the current session has restorable user data.
 
 =head2 from_session($c, $frozenuser )
 
