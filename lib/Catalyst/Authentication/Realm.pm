@@ -26,7 +26,7 @@ sub new {
             $self->config->{'use_session'} = 1;
         }
     }
-    print STDERR "use session is " . $self->config->{'use_session'} . "\n";
+
     $app->log->debug("Setting up auth realm $realmname") if $app->debug;
 
     # use the Null store as a default
@@ -172,11 +172,17 @@ sub restore_user {
     $frozen_user ||= $self->user_is_restorable($c);
     return unless defined($frozen_user);
 
-    $c->_user( my $user = $self->from_session( $c, $frozen_user ) );
+    my $user = $self->from_session( $c, $frozen_user );
     
-    # this sets the realm the user originated in.
-    $user->auth_realm($self->name);
+    if ($user) {
+        $c->_user( $user );
     
+        # this sets the realm the user originated in.
+        $user->auth_realm($self->name);
+    } else {
+		Catalyst::Exception->throw("Store claimed to have a restorable user, but restoration failed.  Did you change the user's id_field?");
+	}
+	 
     return $user;
 }
 
@@ -292,33 +298,48 @@ Performs the authentication process for the current realm.  The default
 realm class simply delegates this to the credential and sets 
 the authenticated user on success.  Returns the authenticated user object;
 
-=head2 save_user_in_session($c, $user)
+=head1 USER PERSISTANCE
 
-Used to save the user in a session. Saves $user in the current session, 
-marked as originating in the current realm.  Calls $store->for_session() by 
-default.  If for_session is not available in the store class, will attempt
-to call $user->for_session().
+The Realm class allows complete control over the persistance of users
+between requests.  By default the realm attempts to use the Catalyst
+session system to accomplish this.  By overriding the methods below
+in a custom Realm class, however, you can handle user persistance in
+any way you see fit.  
 
 =head2 persist_user($c, $user)
 
-Takes the user data and persists it in the sessi.on
+persist_user is the entry point for saving user information between requests
+in most cases this will utilize the session.  By default this uses the 
+catalyst session system to store the user by calling for_session on the
+active store.  The user object must be a subclass of 
+Catalyst::Authentication::User.  If you have updated the user object, you 
+must call persist_user again to ensure that the persisted user object reflects
+your updates.
 
 =head2 remove_persisted_user($c)
 
-Removes any persisted user data in the session.
-
-=head2 restore_user($c, [$frozen_user])
-
-Restores the user from parameter, or the session by default.
+Removes any persisted user data.  By default, removes the user from the session.
 
 =head2 user_is_restorable( $c )
 
-Predicate to tell you if the current session has restorable user data.
+Returns whether there is a persisted user that may be restored.  Returns
+a token used to restore the user.  With the default session persistance
+it returns the raw frozen user information.
+
+=head2 restore_user($c, [$frozen_user])
+
+Restores the user from the given frozen_user parameter, or if not provided,
+using the response from $self->user_is_restorable();  Uses $self->from_session()
+to decode the frozen user.
+
 
 =head2 from_session($c, $frozenuser )
 
-Triggers restoring of the user from data in the session. The default realm
-class simply delegates the call to $store->from_session($c, $frozenuser);
+Decodes the frozenuser information provided and returns an instantiated 
+user object.  By default, this call is delegated to $store->from_session().
+
+=head2 save_user_in_session($c, $user)
+
+DEPRECATED.  Use persist_user instead.  (this simply calls persist_user)
 
 =cut
-
