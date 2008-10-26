@@ -68,7 +68,7 @@ sub butterfly : Local {
     ok( !$c->user, "no user object either" );
 }
 
-__PACKAGE__->config->{'Plugin::Authentication'}{users} = $users = {
+__PACKAGE__->config->{'authentication'}{users} = $users = {
 	foo => User::SessionRestoring->new(
 		id => 'foo',
 		password => "s3cr3t",

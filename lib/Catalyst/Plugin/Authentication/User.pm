@@ -13,7 +13,7 @@ __END__
 
 =head1 NAME
 
-Catalyst::Plugin::Authentication::User- Compatibility shim
+Catalyst::Plugin::Authentication::User - Compatibility shim
 
 =head1 DESCRIPTION
 

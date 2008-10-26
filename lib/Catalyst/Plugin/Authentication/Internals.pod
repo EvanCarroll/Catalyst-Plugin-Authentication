@@ -88,7 +88,7 @@ the credentials match, the authenticate() method should return a user object.
 
 If the user object supports session storage, the successfully authenticated
 user will be placed in session storage. This is done by calling the realm
-object's save_user_in_session() method. The save_user_in_session() routine by
+object's persist_user() method. The persist_user() routine by
 default calls the Store's for_session() method, which should return serialized
 data (IE a scalar). This serialized data is passed back to the store via the
 from_session() method, so the data should contain enough information for the
@@ -106,7 +106,7 @@ B<Sessions> - Per-Request operations
 
 When any user-related activity occurs, and $c->authenticate has not
 yet been called, the Catalyst::Plugin::Authentication module will
-attempt to restore the user from the session (if one is available).
+attempt to restore the persisted user (normally from the session if one is available).
 There is only one step in this process: 
 
 =over 4
@@ -122,7 +122,7 @@ method should return a valid user object.
 Note that the for_session() is only called during the original
 $c->authenticate() call, so if changes are made to the user that need
 to be reflected in your session data, you will want to call the
-$c->save_user_in_session() method - which will perform the session
+$c->persist_user() method - which will perform the session
 storage process again (complete with call to for_session()).
 
 =back

@@ -39,8 +39,6 @@ sub find_user {
 
     my $user = $self->userhash->{$id};
 
-    #print STDERR "FOO1! " . ref($user) . " - ". Scalar::Util::blessed($user) . "\n";
-
     if ( ref($user) eq "HASH") {
         $user->{id} ||= $id;
         return bless $user, "Catalyst::Authentication::User::Hash";

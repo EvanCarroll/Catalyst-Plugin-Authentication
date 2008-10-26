@@ -269,6 +269,11 @@ user doesn't exist (most useful for remote authentication schemes).
 Set this to true if you wish this realm to auto-update user accounts after
 authentication (most useful for remote authentication schemes).
 
+=item use_session
+
+Sets session usage for this particular realm - overriding the global use_sesion setting.
+
+
 =back
 
 =head1 METHODS
@@ -298,7 +303,7 @@ Performs the authentication process for the current realm.  The default
 realm class simply delegates this to the credential and sets 
 the authenticated user on success.  Returns the authenticated user object;
 
-=head1 USER PERSISTANCE
+=head1 USER PERSISTENCE
 
 The Realm class allows complete control over the persistance of users
 between requests.  By default the realm attempts to use the Catalyst

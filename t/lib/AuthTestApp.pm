@@ -13,9 +13,13 @@ use Digest::SHA1 qw/sha1_base64/;
 
 our $users;
 
+sub number_of_elements { return scalar @_ }
+
 sub moose : Local {
 	my ( $self, $c ) = @_;
 
+	is(number_of_elements($c->user), 1, "Array undef");
+	is($c->user, undef, "no user, returns undef");
 	ok(!$c->user, "no user");
 	ok($c->login( "foo", "s3cr3t" ), "can login with clear");
 	is( $c->user, $users->{foo}, "user object is in proper place");

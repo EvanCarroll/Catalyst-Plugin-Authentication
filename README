@@ -75,7 +75,7 @@ INTRODUCTION
     0.10003, realms are now objects that you can create and customize.
 
     An application can have any number of Realms, each of which operates
-    independant of the others. Each realm has a name, which is used to
+    independent of the others. Each realm has a name, which is used to
     identify it as the target of an authentication request. This name can be
     anything, such as 'users' or 'members'. One realm must be defined as the
     default_realm, which is used when no realm name is specified. More
@@ -105,7 +105,7 @@ INTRODUCTION
     and use this information to retrieve the user from the store they are
     paired with.
 
-    storage backends compatible with versions of this module 0.10x and
+    Storage backends compatible with versions of this module 0.10x and
     upwards should be in the namespace "Catalyst::Authentication::Store".
 
    The Core Plugin
@@ -121,7 +121,7 @@ INTRODUCTION
     categories the current user belongs to.
 
 EXAMPLE
-    Let's say we were storing users in a simple perl hash. Users are
+    Let's say we were storing users in a simple Perl hash. Users are
     verified by supplying a password which is matched within the hash.
 
     This means that our application will begin like this:
@@ -134,16 +134,14 @@ EXAMPLE
 
         __PACKAGE__->config->{'Plugin::Authentication'} = 
                     {  
-                        default_realm => 'members',
-                        realms => {
-                            members => {
-                                credential => {
-                                    class => 'Password',
-                                    password_field => 'password',
-                                    password_type => 'clear'
-                                },
-                                store => {
-                                    class => 'Minimal',
+                        default => {
+                            credential => {
+                                class => 'Password',
+                                password_field => 'password',
+                                password_type => 'clear'
+                            },
+                            store => {
+                                class => 'Minimal',
                                     users => {
                                         bob => {
                                             password => "s00p3r",                                       
@@ -156,7 +154,6 @@ EXAMPLE
                                         }
                                     }                       
                                 }
-                            }
                             }
                     };
     
@@ -172,7 +169,7 @@ EXAMPLE
             my ( $self, $c ) = @_;
 
             if (    my $user     = $c->req->params->{user}
-                and my $password = $c->req->params->{password"} )
+                and my $password = $c->req->params->{password} )
             {
                 if ( $c->authenticate( { username => $user, 
                                          password => $password } ) ) {
@@ -248,7 +245,7 @@ EXAMPLE
     This is somewhat simpler and will work if you change your store, too,
     since the role interface is consistent.
 
-    Let's say your app grew, and you now have 10000 users. It's no longer
+    Let's say your app grows, and you now have 10,000 users. It's no longer
     efficient to maintain a hash of users, so you move this data to a
     database. You can accomplish this simply by installing the DBIx::Class
     Store and changing your config:
@@ -256,18 +253,16 @@ EXAMPLE
         __PACKAGE__->config->{'Plugin::Authentication'} = 
                         {  
                             default_realm => 'members',
-                            realms => {
-                                members => {
-                                    credential => {
-                                        class => 'Password',
-                                        password_field => 'password',
-                                        password_type => 'clear'
-                                    },
-                                    store => {
-                                        class => 'DBIx::Class',
+                            members => {
+                                credential => {
+                                    class => 'Password',
+                                    password_field => 'password',
+                                    password_type => 'clear'
+                                },
+                                store => {
+                                    class => 'DBIx::Class',
                                         user_class => 'MyApp::Users',
                                         role_column => 'roles'                      
-                                    }
                                     }
                             }
                         };
@@ -280,31 +275,29 @@ CONFIGURATION
         __PACKAGE__->config->{'Plugin::Authentication'} = 
                     {  
                         default_realm => 'members',
-                        realms => {
-                            members => {
-                                credential => {
-                                    class => 'Password',
-                                    password_field => 'password',
-                                    password_type => 'clear'
-                                },
-                                store => {
-                                    class => 'DBIx::Class',
-                                        user_class => 'MyApp::Users',
-                                        role_column => 'roles'                      
-                                    }
+
+                        members => {
+                            credential => {
+                                class => 'Password',
+                                password_field => 'password',
+                                password_type => 'clear'
+                            },
+                            store => {
+                                class => 'DBIx::Class',
+                                user_class => 'MyApp::Users',
+                                role_column => 'roles'                      
+                            }
                             },
                             admins => {
                                 credential => {
                                     class => 'Password',
                                     password_field => 'password',
-                                    password_type => 'clear'
+                                password_type => 'clear'
                                 },
                                 store => {
                                     class => '+MyApp::Authentication::Store::NetAuth',
                                     authserver => '192.168.10.17'
                                 }
-                            }
-                        
                             }
                     };
 
@@ -317,11 +310,15 @@ CONFIGURATION
         This defines which realm should be used as when no realm is provided
         to methods that require a realm such as authenticate or find_user.
 
-    realms
-        This contains the series of realm configurations you want to use for
-        your app. The only rule here is that there must be at least one. A
-        realm consists of a name, which is used to reference the realm, a
-        credential and a store.
+    realm refs
+        The Plugin::Authentication config hash contains the series of realm
+        configurations you want to use for your app. The only rule here is
+        that there must be at least one. A realm consists of a name, which
+        is used to reference the realm, a credential and a store. You may
+        also put your realm configurations within a subelement called
+        'realms' if you desire to separate them from the remainder of your
+        configuration. Note that if you use a 'realms' subelement, you must
+        put ALL of your realms within it.
 
         You can also specify a realm class to instantiate instead of the
         default Catalyst::Authentication::Realm class using the 'class'
@@ -344,13 +341,13 @@ CONFIGURATION
         Catalyst::Authentication::Store::storename.
 
 METHODS
-  $c->authenticate( $userinfo, [ $realm ])
+  $c->authenticate( $userinfo [, $realm ])
     Attempts to authenticate the user using the information in the $userinfo
     hash reference using the realm $realm. $realm may be omitted, in which
     case the default realm is checked.
 
   $c->user( )
-    Returns the currently logged in user or undef if there is none.
+    Returns the currently logged in user, or undef if there is none.
 
   $c->user_exists( )
     Returns true if a user is logged in right now. The difference between
@@ -364,7 +361,7 @@ METHODS
     both logged in right now and was retrieved from the realm provided.
 
   $c->logout( )
-    Logs the user out, Deletes the currently logged in user from
+    Logs the user out. Deletes the currently logged in user from
     "<$c-"user>> and the session.
 
   $c->find_user( $userinfo, $realm )
@@ -374,7 +371,7 @@ METHODS
   persist_user()
     Under normal circumstances the user data is only saved to the session
     during initial authentication. This call causes the auth system to save
-    the currently authenticated users data across requests. Useful if you
+    the currently authenticated user's data across requests. Useful if you
     have changed the user data and want to ensure that future requests
     reflect the most current data. Assumes that at the time of this call,
     $c->user contains the most current data.
@@ -406,7 +403,7 @@ INTERNAL METHODS
     Retrieves the realm instance for the realmname provided.
 
   $c->update_user_in_session
-    This was a short lived method to update user information - you should
+    This was a short-lived method to update user information - you should
     use persist_user instead.
 
 SEE ALSO
@@ -441,17 +438,16 @@ DON'T SEE ALSO
     At the time of writing these plugins have not yet been replaced or
     updated, but should be eventually:
     Catalyst::Plugin::Authentication::OpenID,
-    Catalyst::Plugin::Authentication::LDAP,
     Catalyst::Plugin::Authentication::CDBI::Basic,
     Catalyst::Plugin::Authentication::Basic::Remote.
 
 INCOMPATABILITIES
-    The realms based configuration and functionality of the 0.10 update of
+    The realms-based configuration and functionality of the 0.10 update of
     Catalyst::Plugin::Authentication required a change in the API used by
     credentials and stores. It has a compatibility mode which allows use of
     modules that have not yet been updated. This, however, completely mimics
     the older api and disables the new realm-based features. In other words
-    you can not mix the older credential and store modules with realms, or
+    you cannot mix the older credential and store modules with realms, or
     realm-based configs. The changes required to update modules are
     relatively minor and are covered in
     Catalyst::Plugin::Authentication::Internals. We hope that most modules

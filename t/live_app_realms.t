@@ -7,6 +7,7 @@ BEGIN {
     plan "no_plan";
 }
 
+
 use lib 't/lib';
 use Catalyst::Test qw/AuthRealmTestApp/;
 
