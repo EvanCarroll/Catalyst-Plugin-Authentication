@@ -13,7 +13,7 @@ use Tie::RefHash;
 use Class::Inspector;
 use Catalyst::Authentication::Realm;
 
-our $VERSION = "0.10008";
+our $VERSION = "0.10009";
 
 sub set_authenticated {
     my ( $c, $user, $realmname ) = @_;
