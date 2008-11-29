@@ -13,6 +13,7 @@ inc/Module/Install/WriteAll.pm
 lib/Catalyst/Authentication/Credential/Password.pm
 lib/Catalyst/Authentication/Realm.pm
 lib/Catalyst/Authentication/Realm/Compatibility.pm
+lib/Catalyst/Authentication/Realm/Progressive.pm
 lib/Catalyst/Authentication/Store.pod
 lib/Catalyst/Authentication/Store/Minimal.pm
 lib/Catalyst/Authentication/Store/Null.pm
@@ -32,10 +33,14 @@ t/04_authentication.t
 t/05_password.t
 t/06_user.t
 t/lib/AuthRealmTestApp.pm
+t/lib/AuthRealmTestAppCompat.pm
+t/lib/AuthRealmTestAppProgressive.pm
 t/lib/AuthSessionTestApp.pm
 t/lib/AuthTestApp.pm
 t/live_app.t
 t/live_app_realms.t
+t/live_app_realms_compat.t
+t/live_app_realms_progressive.t
 t/live_app_session.t
 t/pod.t
 t/pod_coverage.t
