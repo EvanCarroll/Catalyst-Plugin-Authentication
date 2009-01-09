@@ -85,7 +85,7 @@ INTRODUCTION
    Credential Verifiers
     When user input is transferred to the Catalyst application (typically
     via form inputs) the application may pass this information into the
-    authentication system through the "<$c-"authenticate()>> method. From
+    authentication system through the "$c->authenticate()" method. From
     there, it is passed to the appropriate Credential verifier.
 
     These plugins check the data, and ensure that it really proves the user
@@ -156,7 +156,7 @@ EXAMPLE
                                 }
                             }
                     };
-    
+
     This tells the authentication plugin what realms are available, which
     credential and store modules are used, and the configuration of each.
     With this code loaded, we can now attempt to authenticate users.
@@ -188,15 +188,15 @@ EXAMPLE
     succeeds the user is logged in.
 
     The credential verifier will attempt to retrieve the user whose details
-    match the authentication information provided to "<$c-"authenticate()>>.
+    match the authentication information provided to "$c->authenticate()".
     Once it fetches the user the password is checked and if it matches the
-    user will be authenticated and "<$c-"user>> will contain the user object
+    user will be authenticated and "$c->user" will contain the user object
     retrieved from the store.
 
     In the above case, the default realm is checked, but we could just as
     easily check an alternate realm. If this were an admin login, for
     example, we could authenticate on the admin realm by simply changing the
-    "<$c-"authenticate()>> call:
+    "$c->authenticate()" call:
 
         if ( $c->authenticate( { username => $user, 
                                  password => $password }, 'admin' ) ) {
@@ -219,10 +219,10 @@ EXAMPLE
         }
 
     (Note that if you have multiple realms, you can use
-    "<$c-"user_in_realm('realmname')>>) in place of "<$c-"user_exists();>>
-    This will essentially perform the same verification as user_exists, with
-    the added requirement that if there is a user, it must have come from
-    the realm specified.)
+    "$c->user_in_realm('realmname')" in place of "$c->user_exists();" This
+    will essentially perform the same verification as user_exists, with the
+    added requirement that if there is a user, it must have come from the
+    realm specified.)
 
     The above example is somewhat similar to role based access control.
     Catalyst::Authentication::Store::Minimal treats the roles field as an
@@ -361,8 +361,8 @@ METHODS
     both logged in right now and was retrieved from the realm provided.
 
   $c->logout( )
-    Logs the user out. Deletes the currently logged in user from
-    "<$c-"user>> and the session.
+    Logs the user out. Deletes the currently logged in user from "$c->user"
+    and the session.
 
   $c->find_user( $userinfo, $realm )
     Fetch a particular users details, matching the provided user info, from
@@ -375,6 +375,9 @@ METHODS
     have changed the user data and want to ensure that future requests
     reflect the most current data. Assumes that at the time of this call,
     $c->user contains the most current data.
+
+  find_realm_for_persisted_user()
+    Private method, do not call from user code!
 
 INTERNAL METHODS
     These methods are for Catalyst::Plugin::Authentication INTERNAL USE
@@ -514,6 +517,8 @@ AUTHORS
     Jess Robinson
 
     David Kamholz
+
+    Tomas Doran (t0m), "bobtfish@bobtfish.net"
 
 COPYRIGHT & LICENSE
             Copyright (c) 2005 the aforementioned authors. All rights

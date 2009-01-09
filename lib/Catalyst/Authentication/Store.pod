@@ -78,7 +78,7 @@ If your users support sessions, your store should also define the
 C<from_session> method. When the user object is saved in the session the
 C<for_session> method is called, and that is used as the value in the session
 (typically a user id). The store is also saved in the hash. If
-C<<$user->store>> returns something registered, that store's name is used. If
+C<< $user->store >> returns something registered, that store's name is used. If
 not, the user's class is used as if it were a store (and must also support
 C<from_session>).
 

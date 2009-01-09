@@ -71,39 +71,6 @@ sub get_user {
     $self->find_user({id => $id});
 }
 
-## backwards compatibility
-sub setup {
-    my $c = shift;
-
-    ### If a user does 'use Catalyst qw/Authentication::Store::Minimal/'
-    ### he will be proxied on to this setup routine (and only then --
-    ### non plugins should NOT have their setup routine invoked!)
-    ### Beware what we pass to the 'new' routine; it wants
-    ### a config has with a top level key 'users'. New style
-    ### configs do not have this, and split by realms. If we
-    ### blindly pass this to new, we will 1) overwrite what we
-    ### already passed and 2) make ->userhash undefined, which
-    ### leads to:
-    ###  Can't use an undefined value as a HASH reference at
-    ###  lib/Catalyst/Authentication/Store/Minimal.pm line 38.
-    ###
-    ### So only do this compatibility call if:
-    ### 1) we have a {users} config directive 
-    ###
-    ### Ideally we could also check for:
-    ### 2) we don't already have a ->userhash
-    ### however, that's an attribute of an object we can't 
-    ### access =/ --kane
-    
-    my $cfg = $c->config->{'Plugin::Authentication'}->{users}
-                ? $c->config->{'Plugin::Authentication'}
-                : undef;
-
-    $c->default_auth_store( __PACKAGE__->new( $cfg, $c ) ) if $cfg;
-    
-	$c->NEXT::setup(@_);
-}
-
 __PACKAGE__;
 
 __END__
@@ -220,6 +187,8 @@ Delegates to C<get_user>.
 Chooses a random user from the hash and delegates to it.
 
 =head2 get_user( )
+
+Deprecated
 
 =head2 setup( )
 

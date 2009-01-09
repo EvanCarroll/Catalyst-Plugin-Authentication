@@ -13,7 +13,7 @@ use Tie::RefHash;
 use Class::Inspector;
 use Catalyst::Authentication::Realm;
 
-our $VERSION = "0.100091";
+our $VERSION = "0.10009_01";
 
 sub set_authenticated {
     my ( $c, $user, $realmname ) = @_;
@@ -575,7 +575,7 @@ realms is available in the configuration section.
 
 When user input is transferred to the L<Catalyst> application
 (typically via form inputs) the application may pass this information
-into the authentication system through the C<<$c->authenticate()>>
+into the authentication system through the C<< $c->authenticate() >>
 method.  From there, it is passed to the appropriate Credential
 verifier.
 
@@ -651,7 +651,6 @@ This means that our application will begin like this:
         	            }
         	        }
                 };
-    
 
 This tells the authentication plugin what realms are available, which
 credential and store modules are used, and the configuration of each. With
@@ -685,13 +684,13 @@ user is logged in.
 
 The credential verifier will attempt to retrieve the user whose
 details match the authentication information provided to
-C<<$c->authenticate()>>. Once it fetches the user the password is
+C<< $c->authenticate() >>. Once it fetches the user the password is
 checked and if it matches the user will be B<authenticated> and
-C<<$c->user>> will contain the user object retrieved from the store.
+C<< $c->user >> will contain the user object retrieved from the store.
 
 In the above case, the default realm is checked, but we could just as easily
 check an alternate realm. If this were an admin login, for example, we could
-authenticate on the admin realm by simply changing the C<<$c->authenticate()>>
+authenticate on the admin realm by simply changing the C<< $c->authenticate() >>
 call:
 
     if ( $c->authenticate( { username => $user, 
@@ -716,8 +715,8 @@ The restricted action might look like this:
     }
 
 (Note that if you have multiple realms, you can use
-C<<$c->user_in_realm('realmname')>>) in place of
-C<<$c->user_exists();>> This will essentially perform the same
+C<< $c->user_in_realm('realmname') >> in place of
+C<< $c->user_exists(); >> This will essentially perform the same
 verification as user_exists, with the added requirement that if there
 is a user, it must have come from the realm specified.)
 
@@ -870,7 +869,7 @@ logged in right now and was retrieved from the realm provided.
 
 =head2 $c->logout( )
 
-Logs the user out. Deletes the currently logged in user from C<<$c->user>> and the session.
+Logs the user out. Deletes the currently logged in user from C<< $c->user >> and the session.
 
 =head2 $c->find_user( $userinfo, $realm )
 
@@ -885,6 +884,10 @@ currently authenticated user's data across requests.  Useful if you have
 changed the user data and want to ensure that future requests reflect the
 most current data.  Assumes that at the time of this call, $c->user 
 contains the most current data.
+
+=head2 find_realm_for_persisted_user()
+
+Private method, do not call from user code!
 
 =head1 INTERNAL METHODS
 
@@ -1047,6 +1050,8 @@ Jay Kuri, C<jayk@cpan.org>
 Jess Robinson
 
 David Kamholz
+
+Tomas Doran (t0m), C<bobtfish@bobtfish.net> 
 
 =head1 COPYRIGHT & LICENSE
 

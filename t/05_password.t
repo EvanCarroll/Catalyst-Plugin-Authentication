@@ -6,6 +6,6 @@ use Test::More 'no_plan';
 
 my $m; BEGIN { use_ok($m = "Catalyst::Authentication::Credential::Password") }
 
-can_ok($m, "login");
+can_ok($m, "authenticate");
 
 
