@@ -1,9 +1,13 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+0.100092
+      - Release new version, no changes since dev release.     
+
 0.10009_01
       - Fix POD escaping, from RT#38694 (Luke Ross)
       - Change authentication backwards compatibility handling to not rely on
-        Class::Data::Inheritable side effects, and so be Catalyst 5.80 safe (t0m)
+        Class::Data::Inheritable side effects, and so be Catalyst 5.80 safe 
+        (t0m)
 
 0.10009 2008-11-27
         - Including progressive realm for multiple authentication attempts
