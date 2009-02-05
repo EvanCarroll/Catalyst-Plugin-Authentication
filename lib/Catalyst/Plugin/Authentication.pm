@@ -2,9 +2,7 @@ package Catalyst::Plugin::Authentication;
 
 use base qw/Class::Accessor::Fast Class::Data::Inheritable/;
 
-BEGIN {
-    __PACKAGE__->mk_accessors(qw/_user/);
-}
+__PACKAGE__->mk_accessors(qw/_user/);
 
 use strict;
 use warnings;
@@ -13,7 +11,7 @@ use Tie::RefHash;
 use Class::Inspector;
 use Catalyst::Authentication::Realm;
 
-our $VERSION = "0.100092";
+our $VERSION = "0.100092_01";
 
 sub set_authenticated {
     my ( $c, $user, $realmname ) = @_;
@@ -189,7 +187,7 @@ sub auth_restore_user {
     $c->_user( my $user = $realm->restore_user( $c, $frozen_user ) );
     
     # this sets the realm the user originated in.
-    $user->auth_realm($realm->name);
+    $user->auth_realm($realm->name) if $user;
         
     return $user;
 

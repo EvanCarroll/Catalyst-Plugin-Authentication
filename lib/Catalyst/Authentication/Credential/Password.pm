@@ -64,6 +64,9 @@ sub check_password {
         if ($self->_config->{'password_type'} eq 'none') {
             return 1;
         } elsif ($self->_config->{'password_type'} eq 'clear') {
+            # FIXME - Should we warn in the $storedpassword undef case, 
+            #         as the user probably fluffed the config?
+            return unless defined $storedpassword;
             return $password eq $storedpassword;
         } elsif ($self->_config->{'password_type'} eq 'crypted') {            
             return $storedpassword eq crypt( $password, $storedpassword );

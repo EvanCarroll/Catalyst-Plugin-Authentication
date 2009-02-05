@@ -39,15 +39,32 @@ sub elk : Local {
 	ok( $c->user_exists, "user exists" );
 	ok( $c->user, "a user was also restored");
 	is_deeply( $c->user, $users->{foo}, "restored user is the right one (deep test - store might change identity)" );
-    
+	
+	# Rename the user!
+	$users->{bar} = delete $users->{foo};
+}
+
+sub yak : Local {
+    my ( $self, $c ) = @_;
+    ok( $c->sessionid, "session ID was restored after user renamed" );
+    ok( $c->user_exists, "user appears to exist" );
+    ok( !$c->user, "user was not restored");
+    ok(scalar(@{ $c->error }), 'Error recorded');
+    ok( !$c->user_exists, "user no longer appears to exist" );
+}
+
+sub goat : Local {
+    my ( $self, $c ) = @_;
+    ok($c->login( "bar", "s3cr3t" ), "can login with clear (new username)");
+    is( $c->user, $users->{bar}, "user object is in proper place");
     $c->logout;
 }
 
 sub fluffy_bunny : Local {
-	my ( $self, $c ) = @_;
+    my ( $self, $c ) = @_;
 
-	ok( $c->session_is_valid, "no session ID was restored");
-	ok( !$c->user, "no user was restored");
+    ok( $c->session_is_valid, "session ID is restored after logout");
+    ok( !$c->user, "no user was restored after logout");
 	
     $c->delete_session("bah");
 }

@@ -4,6 +4,7 @@ author:
   - 'Yuval Kogman, C<nothingmuch@woobling.org>'
 build_requires:
   Test::Exception: 0
+  Test::MockObject: 0
   Test::More: 0
 distribution_type: module
 generated_by: 'Module::Install version 0.77'
@@ -23,4 +24,4 @@ requires:
   perl: 5.8.1
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.100092
+version: 0.100092_01

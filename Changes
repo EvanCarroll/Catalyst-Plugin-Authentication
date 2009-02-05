@@ -1,5 +1,13 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+0.100092_01
+      - Add hook for failing user restore.
+        - Add test for this.
+      - Fix bug in Credential::Password with password_type: clear.
+        - Add test for this.
+      - Add mock object tests for Credential::Password with password_type: 
+        clear.
+
 0.100092
       - Release new version, no changes since dev release.     
 

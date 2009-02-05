@@ -15,6 +15,7 @@ requires 'Catalyst::Plugin::Session' => '0.10';
 
 test_requires 'Test::More';
 test_requires 'Test::Exception';
+test_requires 'Test::MockObject';
 
 auto_install;
 WriteAll;

@@ -71,12 +71,18 @@ sub new {
     };
     
     if ($@) {
+        # If the file is missing, then try the old-style fallback, 
+        # but re-throw anything else for the user to deal with.
+        die unless $@ =~ /^Can't locate/;
         $app->log->warn( qq(Credential class "$credentialclass" not found, trying deprecated ::Plugin:: style naming. ) );
         my $origcredentialclass = $credentialclass;
         $credentialclass =~ s/Catalyst::Authentication/Catalyst::Plugin::Authentication/;
 
         eval { Catalyst::Utils::ensure_class_loaded( $credentialclass ); };
         if ($@) {
+            # Likewise this croak is useful if the second exception is also "not found",
+            # but would be confusing if it's anything else.
+            die unless $@ =~ /^Can't locate/;
             Carp::croak "Unable to load credential class, " . $origcredentialclass . " OR " . $credentialclass . 
                         " in realm " . $self->name;
         }
@@ -87,11 +93,17 @@ sub new {
     };
     
     if ($@) {
+        # If the file is missing, then try the old-style fallback, 
+        # but re-throw anything else for the user to deal with.
+        die unless $@ =~ /^Can't locate/;
         $app->log->warn( qq(Store class "$storeclass" not found, trying deprecated ::Plugin:: style naming. ) );
         my $origstoreclass = $storeclass;
         $storeclass =~ s/Catalyst::Authentication/Catalyst::Plugin::Authentication/;
         eval { Catalyst::Utils::ensure_class_loaded( $storeclass ); };
         if ($@) {
+            # Likewise this croak is useful if the second exception is also "not found",
+            # but would be confusing if it's anything else.
+            die unless $@ =~ /^Can't locate/;
             Carp::croak "Unable to load store class, " . $origstoreclass . " OR " . $storeclass . 
                         " in realm " . $self->name;
         }
@@ -179,11 +191,23 @@ sub restore_user {
     
         # this sets the realm the user originated in.
         $user->auth_realm($self->name);
-    } else {
-		Catalyst::Exception->throw("Store claimed to have a restorable user, but restoration failed.  Did you change the user's id_field?");
+    } 
+    else {
+        $self->failed_user_restore($c) ||
+            $c->error("Store claimed to have a restorable user, but restoration failed.  Did you change the user's id_field?");
 	}
 	 
     return $user;
+}
+
+## this occurs if there is a session but the thing the session refers to
+## can not be found.  Do what you must do here.
+## Return true if you can fix the situation and find a user, false otherwise
+sub failed_user_restore {
+	my ($self, $c) = @_;
+	
+	$self->remove_persisted_user($c);
+	return;
 }
 
 sub persist_user {
@@ -337,6 +361,11 @@ Restores the user from the given frozen_user parameter, or if not provided,
 using the response from $self->user_is_restorable();  Uses $self->from_session()
 to decode the frozen user.
 
+=head2 failed_user_restore($c)
+
+If there is a session to restore, but the restore fails for any reason then this method 
+is called. This method supplied just removes the persisted user, but can be overridden
+if required to have more complex logic (e.g. finding a the user by their 'old' username).
 
 =head2 from_session($c, $frozenuser )
 
