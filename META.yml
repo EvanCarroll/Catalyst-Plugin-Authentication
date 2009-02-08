@@ -21,7 +21,8 @@ requires:
   Catalyst::Plugin::Session: 0.10
   Catalyst::Runtime: 0
   Class::Inspector: 0
+  MRO::Compat: 0
   perl: 5.8.1
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.100092_01
+version: 0.10010

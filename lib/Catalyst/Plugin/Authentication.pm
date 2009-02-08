@@ -7,11 +7,12 @@ __PACKAGE__->mk_accessors(qw/_user/);
 use strict;
 use warnings;
 
+use MRO::Compat;
 use Tie::RefHash;
 use Class::Inspector;
 use Catalyst::Authentication::Realm;
 
-our $VERSION = "0.100092_01";
+our $VERSION = "0.10010";
 
 sub set_authenticated {
     my ( $c, $user, $realmname ) = @_;
@@ -32,7 +33,7 @@ sub set_authenticated {
 
     $c->persist_user();    
     
-    $c->NEXT::set_authenticated($user, $realmname);
+    $c->maybe::next::method($user, $realmname);
 }
 
 sub user {
@@ -130,7 +131,7 @@ sub logout {
         $realm->remove_persisted_user($c);
     }
     
-    $c->NEXT::logout(@_);
+    $c->maybe::next::method(@_);
 }
 
 sub find_user {
@@ -199,7 +200,7 @@ sub setup {
     my $app = shift;
 
     $app->_authentication_initialize();
-    $app->NEXT::setup(@_);
+    $app->next::method(@_);
 }
 
 ## the actual initialization routine. whee.

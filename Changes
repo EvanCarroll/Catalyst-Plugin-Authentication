@@ -1,5 +1,10 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+0.10010
+      - Change from NEXT to MRO::Compat
+      - Chop a number off the versions to get back to the correct 0.10000 
+        version scheme.
+
 0.100092_01
       - Add hook for failing user restore.
         - Add test for this.
