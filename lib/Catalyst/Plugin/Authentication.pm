@@ -12,7 +12,7 @@ use Tie::RefHash;
 use Class::Inspector;
 use Catalyst::Authentication::Realm;
 
-our $VERSION = "0.10010";
+our $VERSION = "0.10011";
 
 sub set_authenticated {
     my ( $c, $user, $realmname ) = @_;
@@ -98,7 +98,7 @@ sub persist_user {
         ## if we have a valid session handler - we store the 
         ## realm in the session.  If not - we have to hope that 
         ## the realm can recognize its frozen user somehow.
-        if ($c->isa("Catalyst::Plugin::Session") && 
+        if ($c->can('session') && 
             $c->config->{'Plugin::Authentication'}{'use_session'} && 
             $c->session_is_valid) {
         
@@ -153,7 +153,7 @@ sub find_realm_for_persisted_user {
     my $c = shift;
     
     my $realm;
-    if ($c->isa("Catalyst::Plugin::Session")
+    if ($c->can('session')
         and $c->config->{'Plugin::Authentication'}{'use_session'}
         and $c->session_is_valid 
         and exists($c->session->{'__user_realm'})) {

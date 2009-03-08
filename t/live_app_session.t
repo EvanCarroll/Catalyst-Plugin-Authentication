@@ -6,7 +6,9 @@ use Test::More;
 BEGIN {
 	eval { require Test::WWW::Mechanize::Catalyst; require Catalyst::Plugin::Session; require Catalyst::Plugin::Session::State::Cookie };
 	plan skip_all => "This test needs Test::WWW::Mechanize::Catalyst, Catalyst::Plugin::Session and Catalyst::Plugin::Session::State::Cookie installed" if $@;
-	plan tests => 29;
+    plan skip_all => "This test needs Test::WWW::Mechanize::Catalyst >= 0.50, you have only $Test::WWW::Mechanize::Catalyst::VERSION"
+        unless $Test::WWW::Mechanize::Catalyst::VERSION >= 0.50;
+    plan tests => 29;
 }
 
 use lib 't/lib';
@@ -24,3 +26,4 @@ $m->get_ok("http://localhost/goat", "get ok");
 $m->get_ok("http://localhost/fluffy_bunny", "get ok");
 $m->get_ok("http://localhost/possum", "get ok");
 $m->get_ok("http://localhost/butterfly", "get ok");
+

@@ -171,7 +171,7 @@ sub user_is_restorable {
     my ($self, $c) = @_;
     
     return unless
-         $c->isa("Catalyst::Plugin::Session")
+         $c->can('session')
          and $self->config->{'use_session'}
          and $c->session_is_valid;
 
@@ -214,7 +214,7 @@ sub persist_user {
     my ($self, $c, $user) = @_;
     
     if (
-        $c->isa("Catalyst::Plugin::Session")
+        $c->can('session')
         and $self->config->{'use_session'}
         and $user->supports("session") 
     ) {
@@ -236,7 +236,7 @@ sub remove_persisted_user {
     my ($self, $c) = @_;
     
     if (
-        $c->isa("Catalyst::Plugin::Session")
+        $c->can('session')
         and $self->config->{'use_session'}
         and $c->session_is_valid
     ) {
