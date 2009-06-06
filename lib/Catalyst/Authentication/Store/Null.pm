@@ -52,7 +52,7 @@ Catalyst::Authentication::Store::Null - Null authentication store
         Authentication
     );
 
-    __PACKAGE__->config->{'Plugin::Authentication'} = {
+    __PACKAGE__->config( 'Plugin::Authentication' => {
         default_realm => 'remote',
         realms => {
             remote => {
@@ -65,7 +65,7 @@ Catalyst::Authentication::Store::Null - Null authentication store
                 }
             }
     	}
-    };
+    });
 
 =head1 DESCRIPTION
 

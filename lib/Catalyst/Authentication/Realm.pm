@@ -29,10 +29,13 @@ sub new {
 
     $app->log->debug("Setting up auth realm $realmname") if $app->debug;
 
-    # use the Null store as a default
-    if( ! exists $config->{store}{class} ) {
+    # use the Null store as a default - Don't complain if the realm class is being overridden, 
+    # as the new realm may behave differently.
+    if( ! exists($config->{store}{class}) ) {
         $config->{store}{class} = '+Catalyst::Authentication::Store::Null';
-        $app->log->debug( qq(No Store specified for realm "$realmname", using the Null store.) );
+        if (! exists($config->{class})) {
+            $app->log->debug( qq(No Store specified for realm "$realmname", using the Null store.) );
+        }
     } 
     my $storeclass = $config->{'store'}{'class'};
     

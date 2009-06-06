@@ -64,6 +64,13 @@ sub get_object {
     return shift;
 }
 
+## obj is shorthand for get_object.  This is originally from the DBIx::Class store, but 
+## as it has become common usage, this makes things more compatible.  Plus, it's shorter.
+sub obj {
+    my $self = shift;
+    return $self->get_object(@_);
+}
+
 ## Backwards Compatibility
 ## you probably want auth_realm, in fact.  but this does work for backwards compatibility.
 ## store should be a read-write accessor - so it was moved to mk_accessors
@@ -106,9 +113,18 @@ ID.
 
 An introspection method used to determine what features a user object has, to support credential and authorization plugins.
 
-=head2 get( )
+=head2 get( $field )
+
+Returns the value for the $field provided.
 
 =head2 get_object( )
+
+Returns the underlying object storing the user data.  The return value of this function will vary depending
+on the storage module used.
+
+=head2 obj( )
+
+Shorthand for get_object( )
 
 =cut
 

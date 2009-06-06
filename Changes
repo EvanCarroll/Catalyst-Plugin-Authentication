@@ -1,5 +1,18 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+0.10012 Sat Jun  6 10:58:43 BST 2009
+      - Add Catalyst::Authentication::Credential::Remote which authenticates you
+        directly from environment variables passed by your web server. This
+        allows the use of SSL client certificates, NTLM, or just basic/digest
+        auth done at the web server level to be used to authenticate users
+        to your Catalyst application (kmx)
+        - Tests for this
+      - Change ->config invocations to be best practices (t0m)
+      - Note about session auto-vification even when use_session is set
+        to false (robert).
+      - Note about how a realms key used to be needed to unconfuse people
+        running an old version, but browsing the docs on search.cpan (ruoso)
+
 0.10011 Sun Mar  8 23:32:12 GMT 2009
       - Update t/live_app_session.t to skip unless you have a newer, more
         reliable version of TWMC (RT#43817)

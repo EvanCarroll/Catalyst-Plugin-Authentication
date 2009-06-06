@@ -11,6 +11,7 @@ inc/Module/Install/Metadata.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
 lib/Catalyst/Authentication/Credential/Password.pm
+lib/Catalyst/Authentication/Credential/Remote.pm
 lib/Catalyst/Authentication/Realm.pm
 lib/Catalyst/Authentication/Realm/Compatibility.pm
 lib/Catalyst/Authentication/Realm/Progressive.pm
@@ -28,7 +29,6 @@ lib/Catalyst/Plugin/Authentication/User/Hash.pm
 Makefile.PL
 MANIFEST			This list of files
 META.yml
-README
 t/04_authentication.t
 t/05_password.t
 t/06_user.t
@@ -37,10 +37,15 @@ t/lib/AuthRealmTestAppCompat.pm
 t/lib/AuthRealmTestAppProgressive.pm
 t/lib/AuthSessionTestApp.pm
 t/lib/AuthTestApp.pm
+t/lib/RemoteTestApp1.pm
+t/lib/RemoteTestApp2.pm
+t/lib/RemoteTestEngine.pm
 t/live_app.t
 t/live_app_realms.t
 t/live_app_realms_compat.t
 t/live_app_realms_progressive.t
+t/live_app_remote1.t
+t/live_app_remote2.t
 t/live_app_session.t
 t/pod.t
 t/pod_coverage.t

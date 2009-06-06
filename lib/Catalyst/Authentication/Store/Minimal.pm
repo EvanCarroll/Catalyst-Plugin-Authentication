@@ -92,7 +92,7 @@ Catalyst::Authentication::Store::Minimal - Minimal authentication store
         Authentication
     /;
 
-    __PACKAGE__->config->{'Plugin::Authentication'} = 
+    __PACKAGE__->config( 'Plugin::Authentication' => 
                     {  
                         default_realm => 'members',
                         realms => {
@@ -118,7 +118,8 @@ Catalyst::Authentication::Store::Minimal - Minimal authentication store
                 	            }
                 	        }
                     	}
-                    };
+                    }
+    );
 
     
 =head1 DESCRIPTION

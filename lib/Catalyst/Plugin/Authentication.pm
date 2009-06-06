@@ -12,7 +12,7 @@ use Tie::RefHash;
 use Class::Inspector;
 use Catalyst::Authentication::Realm;
 
-our $VERSION = "0.10011";
+our $VERSION = "0.10012";
 
 sub set_authenticated {
     my ( $c, $user, $realmname ) = @_;
@@ -626,7 +626,7 @@ This means that our application will begin like this:
         Authentication
     /;
 
-    __PACKAGE__->config->{'Plugin::Authentication'} = 
+    __PACKAGE__->config( 'Plugin::Authentication' => 
                 {  
                     default => {
                         credential => {
@@ -649,7 +649,8 @@ This means that our application will begin like this:
         	                }	                
         	            }
         	        }
-                };
+                }
+    );
 
 This tells the authentication plugin what realms are available, which
 credential and store modules are used, and the configuration of each. With
@@ -745,7 +746,7 @@ efficient to maintain a hash of users, so you move this data to a database.
 You can accomplish this simply by installing the L<DBIx::Class|Catalyst::Authentication::Store::DBIx::Class> Store and
 changing your config:
 
-    __PACKAGE__->config->{'Plugin::Authentication'} = 
+    __PACKAGE__->config( 'Plugin::Authentication'} => 
                     {  
                         default_realm => 'members',
                         members => {
@@ -760,7 +761,8 @@ changing your config:
         	                    role_column => 'roles'	                
         	                }
             	        }
-                    };
+                    }
+    );
 
 The authentication system works behind the scenes to load your data from the
 new source. The rest of your application is completely unchanged.
@@ -769,7 +771,7 @@ new source. The rest of your application is completely unchanged.
 =head1 CONFIGURATION
 
     # example
-    __PACKAGE__->config->{'Plugin::Authentication'} = 
+    __PACKAGE__->config( 'Plugin::Authentication' => 
                 {  
                     default_realm => 'members',
 
@@ -796,15 +798,26 @@ new source. The rest of your application is completely unchanged.
         	                authserver => '192.168.10.17'
         	            }
         	        }
-                };
+                }
+    );
+
+NOTE: Until version 0.10008 of this module, you would need to put all the
+realms inside a "realms" key in the configuration. Please see 
+L</COMPATIBILITY CONFIGURATION> for more information
 
 =over 4
 
 =item use_session
 
 Whether or not to store the user's logged in state in the session, if the
-application is also using L<Catalyst::Plugin::Session>. This 
+application is also using L<Catalyst::Plugin::Session>. This
 value is set to true per default.
+
+However, even if use_session is disabled, if any code touches $c->session, a session
+object will be auto-vivified and session Cookies will be sent in the headers. To
+prevent accidental session creation, check if a session already exists with
+if ($c->sessionid) { ... }. If the session doesn't exist, then don't place
+anything in the session to prevent an unecessary session from being created.
 
 =item default_realm
 
@@ -921,6 +934,12 @@ Retrieves the realm instance for the realmname provided.
 
 This was a short-lived method to update user information - you should use persist_user instead.
 
+=head2 $c->setup_auth_realm( )
+
+=head1 OVERRIDDEN METHODS
+
+=head2 $c->setup( )
+
 =head1 SEE ALSO
 
 This list might not be up to date.  Below are modules known to work with the updated
@@ -932,12 +951,45 @@ L<Catalyst::Authentication::Realm>
 
 =head2 User Storage Backends
 
-L<Catalyst::Authentication::Store::Minimal>,
-L<Catalyst::Authentication::Store::DBIx::Class>,
+=over
+
+=item L<Catalyst::Authentication::Store::Minimal>
+
+=item L<Catalyst::Authentication::Store::DBIx::Class>
+
+=item L<Catalyst::Authentication::Store::LDAP>
+
+=item L<Catalyst::Authentication::Store::RDBO>
+
+=item L<Catalyst::Authentication::Store::Model::KiokuDB>
+
+=item L<Catalyst::Authentication::Store::Jifty::DBI>
+
+=item L<Catalyst::Authentication::Store::Htpasswd>
+
+=back
 
 =head2 Credential verification
 
-L<Catalyst::Authentication::Credential::Password>,
+=over
+
+=item L<Catalyst::Authentication::Credential::Password>
+
+=item L<Catalyst::Authentication::Credential::HTTP>
+
+=item L<Catalyst::Authentication::Credential::OpenID>
+
+=item L<Catalyst::Authentication::Credential::Authen::Simple>
+
+=item L<Catalyst::Authentication::Credential::Flickr>
+
+=item L<Catalyst::Authentication::Credential::Testing>
+
+=item L<Catalyst::Authentication::Credential::AuthTkt>
+
+=item L<Catalyst::Authentication::Credential::Kerberos>
+
+=back
 
 =head2 Authorization
 
@@ -959,11 +1011,6 @@ This module along with its sub plugins deprecate a great number of other
 modules. These include L<Catalyst::Plugin::Authentication::Simple>,
 L<Catalyst::Plugin::Authentication::CDBI>.
 
-At the time of writing these plugins have not yet been replaced or updated, but
-should be eventually: L<Catalyst::Plugin::Authentication::OpenID>,
-L<Catalyst::Plugin::Authentication::CDBI::Basic>,
-L<Catalyst::Plugin::Authentication::Basic::Remote>.
-
 =head1 INCOMPATABILITIES
 
 The realms-based configuration and functionality of the 0.10 update 
@@ -975,6 +1022,26 @@ mix the older credential and store modules with realms, or realm-based
 configs. The changes required to update modules are relatively minor and are
 covered in L<Catalyst::Plugin::Authentication::Internals>.  We hope that most
 modules will move to the compatible list above very quickly.
+
+=head1 COMPATIBILITY CONFIGURATION
+
+Until version 0.10008 of this module, you needed to put all the
+realms inside a "realms" key in the configuration. 
+
+    # example
+    __PACKAGE__->config( 'Plugin::Authentication'} => 
+                {  
+                    default_realm => 'members',
+                    realms => {
+                        members => {
+                            ...
+                        },
+                    },
+                }
+    );
+
+If you use the old, deprecated C<< __PACKAGE__->config( 'authentication' ) >>
+configuration key, then the realms key is still required.
 
 =head1 COMPATIBILITY ROUTINES
 
@@ -1007,7 +1074,7 @@ included here for reference only.
 
 Return the store whose name is 'default'.
 
-This is set to C<< $c->config->{'Plugin::Authentication'}{store} >> if that value exists,
+This is set to C<< $c->config( 'Plugin::Authentication' => { store => # Store} ) >> if that value exists,
 or by using a Store plugin:
 
     # load the Minimal authentication store.
@@ -1035,10 +1102,6 @@ Register stores into the application.
 =head2 $c->auth_store_names( )
 
 =head2 $c->get_user( )
-
-=head2 $c->setup( )
-
-=head2 $c->setup_auth_realm( )
 
 =head1 AUTHORS
 

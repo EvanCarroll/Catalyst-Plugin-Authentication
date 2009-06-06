@@ -108,6 +108,10 @@ Identity record for that realm.
 
 =head1 METHODS
 
+=head2 new ($realmname, $config, $app)
+
+Constructs an instance of this realm.
+
 =head2 authenticate
 
 This method iteratively calls each realm listed in the C<realms> configuration
@@ -137,6 +141,21 @@ sub authenticate {
         }
     }
     return;
+}
+
+## we can not rely on inheriting new() because in this case we do not 
+## load a credential or store, which is what new() sets up in the 
+## standard realm.  So we have to create our realm object, set our name
+## and return $self in order to avoid nasty warnings.
+
+sub new {
+    my ($class, $realmname, $config, $app) = @_;
+
+    my $self = { config => $config };
+    bless $self, $class;
+    
+    $self->name($realmname);
+    return $self;
 }
 
 =head1 AUTHORS
