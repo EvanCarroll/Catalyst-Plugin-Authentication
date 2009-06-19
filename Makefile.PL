@@ -19,4 +19,6 @@ test_requires 'Test::Exception';
 test_requires 'Test::MockObject';
 
 auto_install;
+resources repository => 'http://dev.catalyst.perl.org/repos/Catalyst/trunk/Catalyst-Plugin-Authentication/';
+
 WriteAll;

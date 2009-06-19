@@ -1,5 +1,11 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+0.10013 Fri Jun 19 16:08:00 BST 2009
+      - Add a username_field config item to ::Credential::Remote
+        (Nigel Metheringham)
+      - Die with a useful error message if we are about to try to restore
+        a user from a realm which does not exist. (t0m)
+
 0.10012 Sat Jun  6 10:58:43 BST 2009
       - Add Catalyst::Authentication::Credential::Remote which authenticates you
         directly from environment variables passed by your web server. This

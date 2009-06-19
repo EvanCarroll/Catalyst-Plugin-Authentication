@@ -17,6 +17,7 @@ __PACKAGE__->config(
                     deny_regexp=> 'denied',
                     cutname_regexp=> 'CN=(.*)/OU=Test',
                     source => 'SSL_CLIENT_S_DN',
+                    username_field => 'my_user_name',
                 },
                 store => {
                     class => 'Null',
@@ -29,7 +30,10 @@ __PACKAGE__->config(
 sub default : Local {
     my ( $self, $c ) = @_;
     if ($c->authenticate()) {
-        $c->res->body('User:' . $c->user->{id});
+        $c->res->body( 'User:'
+              . $c->user->{id} . "\n"
+              . 'my_user_name:'
+              . $c->user->{my_user_name} );
     }
     else {
         $c->res->body('FAIL');

@@ -6,7 +6,8 @@ use warnings;
 use base 'Class::Accessor::Fast';
 
 BEGIN {
-    __PACKAGE__->mk_accessors(qw/allow_re deny_re cutname_re source realm/);
+    __PACKAGE__->mk_accessors(
+        qw/allow_re deny_re cutname_re source realm username_field/);
 }
 
 sub new {
@@ -14,7 +15,7 @@ sub new {
 
     my $self = { };
     bless $self, $class;
-    
+
     # we are gonna compile regular expresions defined in config parameters
     # and explicitly throw an exception saying what parameter was invalid 
     if (defined($config->{allow_regexp}) && ($config->{allow_regexp} ne "")) { 
@@ -34,6 +35,7 @@ sub new {
     }
     $self->source($config->{source} || 'REMOTE_USER');
     $self->realm($realm);
+    $self->username_field($config->{username_field} || 'username');
     return $self;
 }
 
@@ -103,7 +105,7 @@ sub authenticate {
         }
     }
     
-    $authinfo->{id} = $authinfo->{username} = $usr; 
+    $authinfo->{id} = $authinfo->{ $self->username_field } = $usr;
     $authinfo->{remote_user} = $remuser; # just to keep the original value
     my $user_obj = $realm->find_user( $authinfo, $c );
     return ref($user_obj) ? $user_obj : undef;
@@ -261,6 +263,14 @@ pure usename by cutname_regexp set to 'CN=(.*), OU=Unit Name, O=Company, C=CZ'.
 Substring is always taken as '$1' regexp substring. If WEBUSER does not
 match cutname_regexp at all or if '$1' regexp substring is empty we pass the
 original WEBUSER value (without cutting) to Catalyst application.
+
+=head2 username_field
+
+This config item is B<OPTIONAL> - default is I<username>
+
+The key name in the authinfo hash that the user's username is mapped into.
+This is useful for using a store which requires a specific unusual field name
+for the username.  The username is additionally mapped onto the I<id> key.
 
 =head1 METHODS
 

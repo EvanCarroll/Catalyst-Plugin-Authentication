@@ -16,4 +16,5 @@ ok( request('/')->is_success, 'testing "source" option' );
 
 $RemoteTestEngine::SSL_CLIENT_S_DN = 'CN=namexyz/OU=Test/C=Company';
 ok( request('/')->is_success, 'testing "source" + "cutname" 1' );
-is( request('/')->content, 'User:namexyz', 'testing "source" + "cutname" 2' );
+is( request('/')->content, "User:namexyz\nmy_user_name:namexyz",
+   'testing "source" + "cutname" 2' );
