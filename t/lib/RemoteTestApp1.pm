@@ -28,7 +28,7 @@ __PACKAGE__->config(
 sub default : Local {
     my ( $self, $c ) = @_;
     if ($c->authenticate()) {
-        $c->res->body('User:' . $c->user->{id});
+        $c->res->body('User:' . $c->user->{username});
     }
     else {
         $c->res->body('FAIL');

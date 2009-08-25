@@ -1,5 +1,16 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+0.10014 Tue Aug 25 15:42:57 BST 2009
+
+      - Don't always supply an "id" column in the authinfo passed to the store
+        class in ::Credential::Remote. This means that it works better with
+        the DBIC store. (t0m)
+
+      - Make auth_realms method ensure authentication is initialized
+        before calling methods which get created during auth initialization.
+        Fixes back compat cases where auth store is in the plugin list
+        before the authentication plugin. (t0m)
+
 0.10013 Fri Jun 19 16:08:00 BST 2009
       - Add a username_field config item to ::Credential::Remote
         (Nigel Metheringham)

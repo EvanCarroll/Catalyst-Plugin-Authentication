@@ -30,10 +30,10 @@ __PACKAGE__->config(
 sub default : Local {
     my ( $self, $c ) = @_;
     if ($c->authenticate()) {
-        $c->res->body( 'User:'
-              . $c->user->{id} . "\n"
-              . 'my_user_name:'
-              . $c->user->{my_user_name} );
+        $c->res->body( 
+              'my_user_name:'
+              . $c->user->{my_user_name}
+        );
     }
     else {
         $c->res->body('FAIL');

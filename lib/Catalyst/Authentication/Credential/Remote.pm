@@ -104,9 +104,8 @@ sub authenticate {
             $usr = $1;
         }
     }
-    
-    $authinfo->{id} = $authinfo->{ $self->username_field } = $usr;
-    $authinfo->{remote_user} = $remuser; # just to keep the original value
+
+    $authinfo->{ $self->username_field } = $usr;
     my $user_obj = $realm->find_user( $authinfo, $c );
     return ref($user_obj) ? $user_obj : undef;
 }
