@@ -1,6 +1,7 @@
 Changes
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
+inc/Module/Install/AuthorTests.pm
 inc/Module/Install/AutoInstall.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
@@ -33,6 +34,8 @@ README
 t/04_authentication.t
 t/05_password.t
 t/06_user.t
+t/author/pod.t
+t/author/pod_coverage.t
 t/lib/AuthRealmTestApp.pm
 t/lib/AuthRealmTestAppCompat.pm
 t/lib/AuthRealmTestAppProgressive.pm
@@ -48,5 +51,3 @@ t/live_app_realms_progressive.t
 t/live_app_remote1.t
 t/live_app_remote2.t
 t/live_app_session.t
-t/pod.t
-t/pod_coverage.t

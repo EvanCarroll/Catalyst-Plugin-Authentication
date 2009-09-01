@@ -3,14 +3,15 @@ abstract: 'Infrastructure plugin for the Catalyst'
 author:
   - 'Yuval Kogman, C<nothingmuch@woobling.org>'
 build_requires:
+  Class::MOP: 0
   ExtUtils::MakeMaker: 6.42
+  Moose: 0
   Test::Exception: 0
-  Test::MockObject: 0
   Test::More: 0
 configure_requires:
   ExtUtils::MakeMaker: 6.42
 distribution_type: module
-generated_by: 'Module::Install version 0.91'
+generated_by: 'Module::Install version 0.910'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -28,5 +29,5 @@ requires:
   perl: 5.8.1
 resources:
   license: http://dev.perl.org/licenses/
-  repository: http://dev.catalyst.perl.org/repos/Catalyst/trunk/Catalyst-Plugin-Authentication/
-version: 0.10014
+  repository: http://dev.catalyst.perl.org/repos/Catalyst/Catalyst-Plugin-Authentication/0.10000/trunk
+version: 0.10015

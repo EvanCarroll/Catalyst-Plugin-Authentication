@@ -1,7 +1,9 @@
 use inc::Module::Install 0.87;
 
-if( -e 'MANIFEST.SKIP' ) {
-    system( 'pod2text lib/Catalyst/Plugin/Authentication.pm > README' );
+if ( $Module::Install::AUTHOR ) {
+    system( 'pod2text lib/Catalyst/Plugin/Authentication.pm > README' )
+        and die;
+    require Module::Install::AuthorTests;
 }
 
 perl_version '5.008001';
@@ -16,9 +18,12 @@ requires 'Catalyst::Plugin::Session' => '0.10';
 
 test_requires 'Test::More';
 test_requires 'Test::Exception';
-test_requires 'Test::MockObject';
+test_requires 'Class::MOP';
+test_requires 'Moose';
+
+author_tests 't/author';
 
 auto_install;
-resources repository => 'http://dev.catalyst.perl.org/repos/Catalyst/trunk/Catalyst-Plugin-Authentication/';
+resources repository => 'http://dev.catalyst.perl.org/repos/Catalyst/Catalyst-Plugin-Authentication/0.10000/trunk';
 
 WriteAll;

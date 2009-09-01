@@ -8,7 +8,7 @@ SYNOPSIS
         /;
 
         # later on ...
-        $c->authenticate({ username => 'myusername', 
+        $c->authenticate({ username => 'myusername',
                            password => 'mypassword' });
         my $age = $c->user->get('age');
         $c->logout;
@@ -132,8 +132,8 @@ EXAMPLE
             Authentication
         /;
 
-        __PACKAGE__->config( 'Plugin::Authentication' => 
-                    {  
+        __PACKAGE__->config( 'Plugin::Authentication' =>
+                    {
                         default => {
                             credential => {
                                 class => 'Password',
@@ -144,7 +144,7 @@ EXAMPLE
                                 class => 'Minimal',
                                     users => {
                                         bob => {
-                                            password => "s00p3r",                                       
+                                            password => "s00p3r",                   
                                             editor => 'yes',
                                             roles => [qw/edit delete/],
                                         },
@@ -152,7 +152,7 @@ EXAMPLE
                                             password => "s3cr3t",
                                             roles => [qw/comment/],
                                         }
-                                    }                       
+                                    }       
                                 }
                             }
                     }
@@ -172,7 +172,7 @@ EXAMPLE
             if (    my $user     = $c->req->params->{user}
                 and my $password = $c->req->params->{password} )
             {
-                if ( $c->authenticate( { username => $user, 
+                if ( $c->authenticate( { username => $user,
                                          password => $password } ) ) {
                     $c->res->body( "hello " . $c->user->get("name") );
                 } else {
@@ -199,7 +199,7 @@ EXAMPLE
     example, we could authenticate on the admin realm by simply changing the
     "$c->authenticate()" call:
 
-        if ( $c->authenticate( { username => $user, 
+        if ( $c->authenticate( { username => $user,
                                  password => $password }, 'admin' ) ) {
             $c->res->body( "hello " . $c->user->get("name") );
         } ...
@@ -251,8 +251,8 @@ EXAMPLE
     database. You can accomplish this simply by installing the DBIx::Class
     Store and changing your config:
 
-        __PACKAGE__->config( 'Plugin::Authentication'} => 
-                        {  
+        __PACKAGE__->config( 'Plugin::Authentication'} =>
+                        {
                             default_realm => 'members',
                             members => {
                                 credential => {
@@ -263,7 +263,7 @@ EXAMPLE
                                 store => {
                                     class => 'DBIx::Class',
                                         user_class => 'MyApp::Users',
-                                        role_column => 'roles'                      
+                                        role_column => 'roles'      
                                     }
                             }
                         }
@@ -274,8 +274,8 @@ EXAMPLE
 
 CONFIGURATION
         # example
-        __PACKAGE__->config( 'Plugin::Authentication' => 
-                    {  
+        __PACKAGE__->config( 'Plugin::Authentication' =>
+                    {
                         default_realm => 'members',
 
                         members => {
@@ -287,7 +287,7 @@ CONFIGURATION
                             store => {
                                 class => 'DBIx::Class',
                                 user_class => 'MyApp::Users',
-                                role_column => 'roles'                      
+                                role_column => 'roles'      
                             }
                             },
                             admins => {
@@ -484,8 +484,8 @@ COMPATIBILITY CONFIGURATION
     inside a "realms" key in the configuration.
 
         # example
-        __PACKAGE__->config( 'Plugin::Authentication'} => 
-                    {  
+        __PACKAGE__->config( 'Plugin::Authentication'} =>
+                    {
                         default_realm => 'members',
                         realms => {
                             members => {
