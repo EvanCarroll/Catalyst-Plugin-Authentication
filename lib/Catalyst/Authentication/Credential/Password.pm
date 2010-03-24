@@ -110,14 +110,14 @@ sub check_password {
 			;
 
 			if ( defined $self->get_config('password_pre_salt_field') ) {
-				if ( exists $user->{password_pre_salt_field} ) {
+				if ( exists $user->{ $self->get_config('password_pre_salt_field') } ) {
 					$d->add( $user->get($self->get_config('password_pre_salt_field')) );
 				}
 				else {
 					Catalyst::Exception->throw( sprintf(
 						"%s password_pre_salt_field used and set to '%s', which is not in the user object"
 						, __PACKAGE__
-						, $user->get( $self->get_config('password_pre_salt_field') )
+						, $self->get_config('password_pre_salt_field')
 					) );
 				}
 			}
@@ -125,14 +125,14 @@ sub check_password {
 			$d->add($password);
 
 			if ( defined $self->get_config('password_post_salt_field') ) {
-				if ( exists $user->{password_pre_salt_field} ) {
+				if ( exists $user->{ $self->get_config('password_post_salt_field') } ) {
 					$d->add( $user->get($self->get_config('password_post_salt_field')) );
 				}
 				else {
 					Catalyst::Exception->throw( sprintf(
 						"%s password_post_salt_field used and set to '%s', which is not in the user object"
 						, __PACKAGE__
-						, $user->get( $self->get_config('password_post_salt_field') )
+						, $self->get_config('password_post_salt_field')
 					) );
 				}
 			}
