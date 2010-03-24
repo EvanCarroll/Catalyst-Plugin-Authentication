@@ -1,95 +1,173 @@
 package Catalyst::Authentication::Credential::Password;
-
 use strict;
 use warnings;
 
-use base qw/Class::Accessor::Fast/;
+use Moose;
 
 use Scalar::Util        ();
 use Catalyst::Exception ();
 use Digest              ();
 
-BEGIN {
-    __PACKAGE__->mk_accessors(qw/_config realm/);
-}
+use Moose::Util::TypeConstraints qw(enum);
 
-sub new {
-    my ($class, $config, $app, $realm) = @_;
-    
-    my $self = { _config => $config };
-    bless $self, $class;
-    
-    $self->realm($realm);
-    
-    $self->_config->{'password_field'} ||= 'password';
-    $self->_config->{'password_type'}  ||= 'clear';
-    $self->_config->{'password_hash_type'} ||= 'SHA-1';
-    
-    my $passwordtype = $self->_config->{'password_type'};
-    if (!grep /$passwordtype/, ('none', 'clear', 'hashed', 'salted_hash', 'crypted', 'self_check')) {
-        Catalyst::Exception->throw(__PACKAGE__ . " used with unsupported password type: " . $self->_config->{'password_type'});
-    }
-    return $self;
-}
+has '_config' => (
+	isa  => 'HashRef'
+	, is => 'ro'
+	, traits => ['Hash']
+	, handles => {
+		get_config => 'get'
+	}
+);
+
+has 'realm' => (
+	isa  => 'Object'
+	, is => 'ro'
+);
+
+has 'password_field' => (
+	isa  => 'Str'
+	, is => 'ro'
+	, default => sub { +shift->get_config('password_field') || 'password' }
+);
+
+has 'password_type' => (
+	#Catalyst::Exception->throw(__PACKAGE__ . " used with unsupported password type: " . $self->_config->{'password_type'});
+	isa  => enum(qw[none clear hashed salted_hash crypted self_check])
+	, is => 'ro'
+	, default => sub { +shift->get_config('password_type') || 'clear' }
+);
+
+has 'password_hash_type' => (
+	isa  => 'Str'
+	, is => 'ro'
+	, default => sub { +shift->get_config('password_hash_type') || 'SHA-1' }
+);
+
 
 sub authenticate {
-    my ( $self, $c, $realm, $authinfo ) = @_;
+	my ( $self, $c, $realm, $authinfo ) = @_;
 
-    ## because passwords may be in a hashed format, we have to make sure that we remove the 
-    ## password_field before we pass it to the user routine, as some auth modules use 
-    ## all data passed to them to find a matching user... 
-    my $userfindauthinfo = {%{$authinfo}};
-    delete($userfindauthinfo->{$self->_config->{'password_field'}});
-    
-    my $user_obj = $realm->find_user($userfindauthinfo, $c);
-    if (ref($user_obj)) {
-        if ($self->check_password($user_obj, $authinfo)) {
-            return $user_obj;
-        }
-    } else {
-        $c->log->debug("Unable to locate user matching user info provided") if $c->debug;
-        return;
-    }
+	## because passwords may be in a hashed format, we have to make sure that we remove the
+	## password_field before we pass it to the user routine, as some auth modules use
+	## all data passed to them to find a matching user...
+	my $userfindauthinfo = {%{$authinfo}};
+	delete $userfindauthinfo->{ $self->get_config('password_field') };
+
+	my $user_obj = $realm->find_user($userfindauthinfo, $c);
+	if (ref($user_obj)) {
+		if ($self->check_password($user_obj, $authinfo)) {
+			return $user_obj;
+		}
+	} else {
+		$c->log->debug("Unable to locate user matching user info provided") if $c->debug;
+		return;
+	}
 }
 
 sub check_password {
-    my ( $self, $user, $authinfo ) = @_;
-    
-    if ($self->_config->{'password_type'} eq 'self_check') {
-        return $user->check_password($authinfo->{$self->_config->{'password_field'}});
-    } else {
-        my $password = $authinfo->{$self->_config->{'password_field'}};
-        my $storedpassword = $user->get($self->_config->{'password_field'});
-        
-        if ($self->_config->{'password_type'} eq 'none') {
-            return 1;
-        } elsif ($self->_config->{'password_type'} eq 'clear') {
-            # FIXME - Should we warn in the $storedpassword undef case, 
-            #         as the user probably fluffed the config?
-            return unless defined $storedpassword;
-            return $password eq $storedpassword;
-        } elsif ($self->_config->{'password_type'} eq 'crypted') {            
-            return $storedpassword eq crypt( $password, $storedpassword );
-        } elsif ($self->_config->{'password_type'} eq 'salted_hash') {
-            require Crypt::SaltedHash;
-            my $salt_len = $self->_config->{'password_salt_len'} ? $self->_config->{'password_salt_len'} : 0;
-            return Crypt::SaltedHash->validate( $storedpassword, $password,
-                $salt_len );
-        } elsif ($self->_config->{'password_type'} eq 'hashed') {
+	my ( $self, $user, $authinfo ) = @_;
 
-             my $d = Digest->new( $self->_config->{'password_hash_type'} );
-             $d->add( $self->_config->{'password_pre_salt'} || '' );
-             $d->add($password);
-             $d->add( $self->_config->{'password_post_salt'} || '' );
+	my $password = $authinfo->{ $self->get_config('password_field') };
+	if ( $self->get_config('password_type') eq 'self_check' ) {
 
-             my $computed    = $d->clone()->digest;
-             my $b64computed = $d->clone()->b64digest;
-             return ( ( $computed eq $storedpassword )
-                   || ( unpack( "H*", $computed ) eq $storedpassword )
-                   || ( $b64computed eq $storedpassword)
-                   || ( $b64computed.'=' eq $storedpassword) );
-        }
-    }
+		return $user->check_password( $password );
+
+	}
+	else {
+		my $storedpassword = $user->get($self->_config->{'password_field'});
+
+		if ( $self->get_config('password_type') eq 'none' ) {
+			return 1;
+		}
+		elsif ( $self->get_config('password_type') eq 'clear' ) {
+			# FIXME - Should we warn in the $storedpassword undef case,
+			#         as the user probably fluffed the config?
+			return unless defined $storedpassword;
+			return $password eq $storedpassword;
+		}
+		elsif ( $self->get_config('password_type') eq 'crypted' ) {
+			return $storedpassword eq crypt( $password, $storedpassword );
+		}
+		elsif ( $self->get_config->{'password_type'} eq 'salted_hash' ) {
+
+			require Crypt::SaltedHash;
+
+			my $salt_len = $self->get_config('password_salt_len') || 0;
+
+			return Crypt::SaltedHash->validate(
+				$storedpassword
+				, $password,
+				$salt_len
+			);
+
+		}
+		elsif ( $self->get_config('password_type') eq 'hashed' ) {
+			my $d = Digest->new( $self->get_config('password_hash_type') );
+
+			## This is a bad, stupid horrable idea
+			$d->add( $self->get_config('password_pre_salt') )
+				if defined $self->get_config('password_pre_salt')
+			;
+
+			if ( defined $self->get_config('password_pre_salt_field') ) {
+				if ( exists $user->{password_pre_salt_field} ) {
+					$d->add( $user->get($self->get_config('password_pre_salt_field')) );
+				}
+				else {
+					Catalyst::Exception->throw( sprintf(
+						"%s password_pre_salt_field used and set to '%s', which is not in the user object"
+						, __PACKAGE__
+						, $user->get( $self->get_config('password_pre_salt_field') )
+					) );
+				}
+			}
+
+			$d->add($password);
+
+			if ( defined $self->get_config('password_post_salt_field') ) {
+				if ( exists $user->{password_pre_salt_field} ) {
+					$d->add( $user->get($self->get_config('password_post_salt_field')) );
+				}
+				else {
+					Catalyst::Exception->throw( sprintf(
+						"%s password_post_salt_field used and set to '%s', which is not in the user object"
+						, __PACKAGE__
+						, $user->get( $self->get_config('password_post_salt_field') )
+					) );
+				}
+			}
+
+			## This is a bad, stupid horrable idea
+			$d->add( $self->get_config('password_post_salt') )
+				if defined $self->get_config('password_post_salt')
+			;
+
+			my $computed    = $d->clone()->digest;
+			my $b64computed = $d->clone()->b64digest;
+
+			## wtf.
+			return (
+				( $computed eq $storedpassword )
+				|| ( unpack( "H*", $computed ) eq $storedpassword )
+				|| ( $b64computed eq $storedpassword)
+				|| ( $b64computed.'=' eq $storedpassword)
+			);
+
+		}
+	}
+}
+
+sub BUILDARGS {
+	my $class = shift;
+
+	if ( @_ == 3 ) {
+		my ( $config, $app, $realm ) = @_;
+		return +{ _config => $config, realm => $realm }
+	}
+	else {
+		return $class->SUPER::BUILDARGS(@_);
+	}
+
 }
 
 __PACKAGE__;
@@ -215,11 +293,19 @@ with L<Digest>. The following config elements affect the hashed configuration:
 
 The hash type used, passed directly to L<Digest/new>.  
 
-=item password_pre_salt 
+=item password_pre_salt_field
+
+=item password_post_salt_field
+
+Specify the field in the user object the contains the salt. This permits you to store the salt in the DB.
+
+=item *DEPRECATED* password_pre_salt 
+
+=item *DEPRECATED* password_post_salt
+
+These are for static salts that exist in the config file, arguably this should *never* be used.
 
 Any pre-salt data to be passed to L<Digest/add> before processing the password.
-
-=item password_post_salt
 
 Any post-salt data to be passed to L<Digest/add> after processing the password.
 
