@@ -92,12 +92,13 @@ sub check_password {
 
 			require Crypt::SaltedHash;
 
+			## Rly? 0 -- the module default is 4.
 			my $salt_len = $self->get_config('password_salt_len') || 0;
 
 			return Crypt::SaltedHash->validate(
 				$storedpassword
-				, $password,
-				$salt_len
+				, $password
+				, $salt_len
 			);
 
 		}
@@ -110,12 +111,12 @@ sub check_password {
 			;
 
 			if ( defined $self->get_config('password_pre_salt_field') ) {
-				if ( exists $user->{ $self->get_config('password_pre_salt_field') } ) {
+				if ( defined $user->get( $self->get_config('password_pre_salt_field') ) ) {
 					$d->add( $user->get($self->get_config('password_pre_salt_field')) );
 				}
 				else {
 					Catalyst::Exception->throw( sprintf(
-						"%s password_pre_salt_field used and set to '%s', which is not in the user object"
+						"%s password_pre_salt_field used and set to '%s', which is not defined in the user object"
 						, __PACKAGE__
 						, $self->get_config('password_pre_salt_field')
 					) );
@@ -125,12 +126,12 @@ sub check_password {
 			$d->add($password);
 
 			if ( defined $self->get_config('password_post_salt_field') ) {
-				if ( exists $user->{ $self->get_config('password_post_salt_field') } ) {
+				if ( defined $user->get( $self->get_config('password_post_salt_field') ) ) {
 					$d->add( $user->get($self->get_config('password_post_salt_field')) );
 				}
 				else {
 					Catalyst::Exception->throw( sprintf(
-						"%s password_post_salt_field used and set to '%s', which is not in the user object"
+						"%s password_post_salt_field used and set to '%s', which is not defined in the user object"
 						, __PACKAGE__
 						, $self->get_config('password_post_salt_field')
 					) );
