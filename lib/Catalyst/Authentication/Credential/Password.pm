@@ -74,7 +74,7 @@ sub check_password {
 
 	}
 	else {
-		my $storedpassword = $user->get($self->_config->{'password_field'});
+		my $storedpassword = $user->get( $self->get_config('password_field') );
 
 		if ( $self->get_config('password_type') eq 'none' ) {
 			return 1;
@@ -88,7 +88,7 @@ sub check_password {
 		elsif ( $self->get_config('password_type') eq 'crypted' ) {
 			return $storedpassword eq crypt( $password, $storedpassword );
 		}
-		elsif ( $self->get_config->{'password_type'} eq 'salted_hash' ) {
+		elsif ( $self->get_config('password_type') eq 'salted_hash' ) {
 
 			require Crypt::SaltedHash;
 
@@ -170,7 +170,7 @@ sub BUILDARGS {
 
 }
 
-__PACKAGE__;
+1;
 
 __END__
 
