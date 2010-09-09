@@ -2,6 +2,8 @@ package Catalyst::Authentication::Credential::Password;
 use strict;
 use warnings;
 
+use namespace::autoclean;
+
 use Moose;
 
 use Scalar::Util        ();
@@ -166,10 +168,12 @@ sub BUILDARGS {
 		return +{ _config => $config, realm => $realm }
 	}
 	else {
-		return $class->SUPER::BUILDARGS(@_);
+		return $class->next::method(@_);
 	}
 
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 
