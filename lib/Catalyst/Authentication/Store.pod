@@ -129,5 +129,5 @@ These plugins should look something like this:
             )
         );
 
-        $c->NEXT::setup(@_);
+        $c->next::method(@_);
     }

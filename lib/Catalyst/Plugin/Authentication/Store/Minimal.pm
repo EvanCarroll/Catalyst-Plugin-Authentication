@@ -35,7 +35,7 @@ sub setup {
 
     $c->default_auth_store( Catalyst::Authentication::Store::Minimal->new( $cfg, $c ) ) if $cfg;
     
-	$c->NEXT::setup(@_);
+	$c->next::method(@_);
 }
 
 foreach my $method (qw/ get_user user_supports find_user from_session /) {
